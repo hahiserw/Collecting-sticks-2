@@ -1,0 +1,7 @@
+Session.vim
+Makefile
+node_modules
+package-lock.json
+*.swp
+pnpm-lock.yaml
+Collecting-sticks
