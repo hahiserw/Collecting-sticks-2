@@ -2,7 +2,9 @@ var express = require('express');
 var router = express.Router();
 
 router.get('/', function(req, res, next) {
-  res.sendFile('index.html');
+  res.render('index', {
+    title: 'Collecting sticks',
+  });
 });
 
 module.exports = router;
