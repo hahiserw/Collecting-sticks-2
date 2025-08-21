@@ -13,7 +13,7 @@ game
 // ( function() {
 
 
-var log, server, canvas, ctx, that; // OMG
+var log, server, canvas, ctx; // OMG
 
 // Constants.
 var
@@ -23,9 +23,25 @@ var
 	PLAYER_HEIGHT = 48;
 
 
-var Game = {};
+var Game = function() {
+  this.you = undefined;
 
-Game.say = function( text ) {
+  this.players = {};
+
+  this.keys = [];
+
+  this.files = {};
+
+  this.graphics = {
+    set: {},
+    players: {},
+    backgrounds: {},
+    items: {}
+  };
+
+};
+
+Game.prototype.say = function( text ) {
 
 	var now = new Date();
 	var
@@ -43,16 +59,16 @@ Game.say = function( text ) {
 
 }
 
-Game.launch = function( canvasId, statusId ) {
+Game.prototype.launch = function( canvasId, statusId ) {
 
 	var handle;
 
 	function update() {
 
-		handle = requestAnimationFrame( update );
+		handle = requestAnimationFrame( update.bind(this) );
 
 		// try {
-			that.render();
+			this.render();
 		// } catch( error ) {
 		// 	cancelAnimationFrame( handle );
 		// 	throw error.message
@@ -64,12 +80,11 @@ Game.launch = function( canvasId, statusId ) {
 
 }
 
-Game.init = function( canvasId, statusId, done ) {
-
-	that = this; // LAME
+Game.prototype.init = function( canvasId, statusId, done ) {
 
 	log = document.getElementById( statusId );
 
+  // TODO rewrite to use promises
 	this.say( "Initializing Game..." );
 	this.say( "Creating Game environment." );
 	this.initCanvas( canvasId );
@@ -88,8 +103,8 @@ Game.init = function( canvasId, statusId, done ) {
 			this.postman();
 			this.say( "Launching Game." );
 			done.call( this );
-		} );
-	}, function( error ) {
+		}.bind(this) );
+	}.bind(this), function( error ) {
 		switch( error.number ) {
 			case 1:
 				this.say( "Server is on. Yet cannot connect." );
@@ -104,16 +119,7 @@ Game.init = function( canvasId, statusId, done ) {
 
 }
 
-Game.files = {};
-
-Game.graphics = {
-	set: {},
-	players: {},
-	backgrounds: {},
-	items: {}
-};
-
-Game.initCanvas = function( id ) {
+Game.prototype.initCanvas = function( id ) {
 
 	canvas = document.getElementById( id );
 	ctx = canvas.getContext( "2d" );
@@ -126,7 +132,7 @@ Game.initCanvas = function( id ) {
 
 }
 
-Game.connect = function( gotInit, gotError ) {
+Game.prototype.connect = function( gotInit, gotError ) {
 
 	var tryNumber = 0;
 	var error = setInterval( function() {
@@ -134,7 +140,7 @@ Game.connect = function( gotInit, gotError ) {
 			gotError.call( that, 1 );
 			clearTimeout( error );
 		} else {
-			that.say( "Trying to connect..." );
+			this.say( "Trying to connect..." );
 		}
 	}, 1000 );
 
@@ -147,26 +153,26 @@ Game.connect = function( gotInit, gotError ) {
 
 		clearTimeout( error );
 
-		that.files = data.files;
+		this.files = data.files;
 		var player = data.player;
 
-		that.you = new Player( player.model, player.x, player.y );
+		this.you = new Player( player.model, player.x, player.y );
 		
-		// that.players.push( that.you );
-		that.players[player.model] = that.you;
+		// this.players.push( this.you );
+		this.players[player.model] = this.you;
 
 		// First one.
-		that.graphics.set["background"] = that.files.backgrounds[0];
-		that.graphics.set["sticks"] = that.files.items[0];
+		this.graphics.set["background"] = this.files.backgrounds[0];
+		this.graphics.set["sticks"] = this.files.items[0];
 
-		gotInit.call( that );
+		gotInit.call( this );
 
-	} );
+	}.bind(this) );
 
 }
 
 // To do: Make this function awesome 'cause it's somehow not to good now.
-Game.loadResources = function( doneLoading ) {
+Game.prototype.loadResources = function( doneLoading ) {
 
 	function loadImage( type, fileName, loaded ) {
 
@@ -178,13 +184,13 @@ Game.loadResources = function( doneLoading ) {
 		var image = new Image();
 
 		image.addEventListener( "load", function() {
-			that.say( "Loaded succesfuly: " + fileName + extension + "." );
-			loaded.call( that, type, fileName, image );
-		}, false );
+			this.say( "Loaded succesfuly: " + fileName + extension + "." );
+			loaded.call( this, type, fileName, image );
+		}.bind(this), false );
 
 		image.addEventListener( "error", function() {
-			that.say( "Error loading image: " + fileName + extension + "." );
-		}, false );
+			this.say( "Error loading image: " + fileName + extension + "." );
+		}.bind(this), false );
 
 		image.src = "graphics/" + fileName + extension;
 
@@ -214,34 +220,34 @@ Game.loadResources = function( doneLoading ) {
 
 }
 
-Game.dataListener = function() {
+Game.prototype.dataListener = function() {
 
 	server.on( "data", function( data ) {
 		for( var model in data ) {
-			if( model === that.model )
+			if( model === this.model )
 				continue;
 			// Playes exists, so just get actual positions.
-			if( that.players[model] && data[model] ) {
-				that.players[model].goTo( data[model].x, data[model].y );
-				that.players[model].setPoints( data[model].points );
-				// that.players[model].message = data[model].message;
-			} else if( !that.players[model] && data[model] ) { // Player connected.
-				that.players[model] = new Player( model, data[model].x, data[model].y );
-				that.say( "Player " + model + " connected." );
-			} else if( that.players[model] && !data[model] ) { // Player disconnected.
-				delete that.players[model];
-				that.say( "Player " + model + " disconnected." );
+			if( this.players[model] && data[model] ) {
+				this.players[model].goTo( data[model].x, data[model].y );
+				this.players[model].setPoints( data[model].points );
+				// this.players[model].message = data[model].message;
+			} else if( !this.players[model] && data[model] ) { // Player connected.
+				this.players[model] = new Player( model, data[model].x, data[model].y );
+				this.say( "Player " + model + " connected." );
+			} else if( this.players[model] && !data[model] ) { // Player disconnected.
+				delete this.players[model];
+				this.say( "Player " + model + " disconnected." );
 			}
 		}
-	} );
+	}.bind(this) );
 
 	server.on( "join", function( data ) {
 
-	}, false );
+	}.bind(this), false );
 
 }
 
-Game.setCanvas = function() {
+Game.prototype.setCanvas = function() {
 
 	canvas.width = MAP_WIDTH;
 	canvas.height = MAP_HEIGHT;
@@ -252,12 +258,12 @@ Game.setCanvas = function() {
 		var
 			x = event.pageX - this.offsetLeft,
 			y = event.pageY - this.offsetTop;
-		that.you.goTo( x, y );
+		this.you.goTo( x, y );
 	}, false );
 
 }
 
-Game.postman = function( stop ) {
+Game.prototype.postman = function( stop ) {
 
 	// Just for testing.
 	if( server.fake )
@@ -276,20 +282,14 @@ Game.postman = function( stop ) {
 	updating = setInterval( function() {
 		// Message system is not ready.
 		server.emit( "update", {
-			x: that.you.getX(),
-			y: that.you.getY()
+			x: this.you.getX(),
+			y: this.you.getY()
 		} );
 	}, 1000 );
 
 }
 
-Game.you = undefined;
-
-Game.players = {};
-
-Game.keys = [],
-
-Game.render = function() {
+Game.prototype.render = function() {
 
 	ctx.drawImage( this.graphics["backgrounds"]["Grass"], 0, 0 );
 
@@ -303,13 +303,13 @@ Game.render = function() {
 
 }
 
-Game.drawSticks = function() {
+Game.prototype.drawSticks = function() {
 
 	// Damn, nothing.
 
 }
 
-Game.playerMove = function() {
+Game.prototype.playerMove = function() {
 
 	// One key at the time.
 	var key = this.keys.indexOf( true );
@@ -336,7 +336,7 @@ Game.playerMove = function() {
 
 }
 
-Game.drawPlayers = function() { // And chat messages.
+Game.prototype.drawPlayers = function() { // And chat messages.
 
 	// Draw players with greater y first.
 	// Sort array every frame? D:
@@ -375,7 +375,7 @@ Game.drawPlayers = function() { // And chat messages.
 
 }
 
-Game.drawPoints = function() {
+Game.prototype.drawPoints = function() {
 
 	// Sort by points... It will take ages to render.
 	// this.players.sort( function( a, b ) {

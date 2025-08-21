@@ -45,9 +45,11 @@ block content
     };
     var io = io? io: clientTest;
 
+    var game = new Game();
+
     document.addEventListener( "DOMContentLoaded", function() {
 
-      Game.launch( "canvas", "status" );
+      game.launch( "canvas", "status" );
 
     }, false );
 
@@ -58,7 +60,7 @@ block content
       if( key < 37 || key > 40 )
         return;
       var direction = key - 37;
-      Game.keys[direction] = ( event.type === "keydown" );
+      game.keys[direction] = ( event.type === "keydown" );
       event.preventDefault();
     }
 
