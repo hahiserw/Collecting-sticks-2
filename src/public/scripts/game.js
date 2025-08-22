@@ -157,7 +157,7 @@ Game.prototype.connect = function( gotInit, gotError ) {
     var player = data.player;
 
     this.you = new Player( player.model, player.x, player.y );
-    
+
     // this.players.push( this.you );
     this.players[player.model] = this.you;
 
@@ -256,10 +256,10 @@ Game.prototype.setCanvas = function() {
 
   canvas.addEventListener( "click", function( event ) {
     var
-      x = event.pageX - this.offsetLeft,
-      y = event.pageY - this.offsetTop;
+      x = event.pageX - event.target.offsetLeft,
+      y = event.pageY - event.target.offsetTop;
     this.you.goTo( x, y );
-  }, false );
+  }.bind( this ), false );
 
 }
 
