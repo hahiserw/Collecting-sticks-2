@@ -65,7 +65,7 @@ Game.prototype.launch = function( canvasId, statusId ) {
 
 	function update() {
 
-		handle = requestAnimationFrame( update.bind(this) );
+		handle = requestAnimationFrame( update.bind( this ) );
 
 		// try {
 			this.render();
@@ -103,8 +103,8 @@ Game.prototype.init = function( canvasId, statusId, done ) {
 			this.postman();
 			this.say( "Launching Game." );
 			done.call( this );
-		}.bind(this) );
-	}.bind(this), function( error ) {
+		}.bind( this ) );
+	}.bind( this ), function( error ) {
 		switch( error.number ) {
 			case 1:
 				this.say( "Server is on. Yet cannot connect." );
@@ -167,7 +167,7 @@ Game.prototype.connect = function( gotInit, gotError ) {
 
 		gotInit.call( this );
 
-	}.bind(this) );
+	}.bind( this ) );
 
 }
 
@@ -186,11 +186,11 @@ Game.prototype.loadResources = function( doneLoading ) {
 		image.addEventListener( "load", function() {
 			this.say( "Loaded succesfuly: " + fileName + extension + "." );
 			loaded.call( this, type, fileName, image );
-		}.bind(this), false );
+		}.bind( this ), false );
 
 		image.addEventListener( "error", function() {
 			this.say( "Error loading image: " + fileName + extension + "." );
-		}.bind(this), false );
+		}.bind( this ), false );
 
 		image.src = "graphics/" + fileName + extension;
 
@@ -239,11 +239,11 @@ Game.prototype.dataListener = function() {
 				this.say( "Player " + model + " disconnected." );
 			}
 		}
-	}.bind(this) );
+	}.bind( this ) );
 
 	server.on( "join", function( data ) {
 
-	}.bind(this), false );
+	}.bind( this ), false );
 
 }
 
