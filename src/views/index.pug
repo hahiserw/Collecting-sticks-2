@@ -45,7 +45,10 @@ block content
     };
     var io = io? io: clientTest;
 
-    var game = new Game();
+    var uri = 'ws' + (document.location.protocol === 'https:'? 's': '')
+      + '://' + document.location.host + '/';
+
+    var game = new Game(uri);
 
     document.addEventListener( "DOMContentLoaded", function() {
 
@@ -109,7 +112,7 @@ block content
     }
 
 
-  .title Collecting sticks game
+  .title Collecting sticks 2
 
   #board
     canvas#canvas(width=512, height=384)

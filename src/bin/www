@@ -5,10 +5,12 @@
  */
 
 var app = require('../app');
+var wsapp = require('../wsapp');
 var debug = require('debug')('cs2:server');
 var http = require('http');
 var https = require('https');
 var fs = require('fs');
+var ws = require('ws');
 
 /**
  * Get port from environment and store in Express.
@@ -31,6 +33,9 @@ else {
   };
   server = https.createServer(options, app);
 }
+
+var wss = new ws.Server({server: server});
+wsapp(wss, app, server);
 
 /**
  * Listen on provided port, on all network interfaces.

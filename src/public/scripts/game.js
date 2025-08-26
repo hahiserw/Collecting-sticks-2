@@ -13,7 +13,7 @@ game
 // ( function() {
 
 
-var log, server, canvas, ctx; // OMG
+var log, canvas, ctx; // OMG
 
 // Constants.
 var
@@ -23,7 +23,9 @@ var
   PLAYER_HEIGHT = 48;
 
 
-var Game = function() {
+var Game = function(uri) {
+  this.uri = uri;
+
   this.you = undefined;
 
   this.players = {};
@@ -132,29 +134,56 @@ Game.prototype.initCanvas = function( id ) {
 
 }
 
+Game.prototype.on = function( event, done ) {
+  var data = JSON.parse( "{}" );
+
+  done( data );
+};
+
 Game.prototype.connect = function( gotInit, gotError ) {
 
   var tryNumber = 0;
   var error = setInterval( function() {
     if( tryNumber++ === 3 ) {
-      gotError.call( that, 1 );
+      gotError.call( this, 1 );
       clearTimeout( error );
     } else {
       this.say( "Trying to connect..." );
     }
-  }, 1000 );
+  }.bind( this ), 1000 );
 
-  server = io.connect( document.location.origin );
+  this.ws = new WebSocket(this.uri);
 
-  if( !server )
+  // this.ws.addEventListener( "open", function(event) {
+  // } );
+
+  if( !this.ws )
     gotError.call( this, 2 );
 
-  server.on( "init", function( data ) {
+  this.ws.addEventListener( "error", console.error );
 
+  this.ws.addEventListener( "message", function( event ) {
+    var data = JSON.parse( event.data );
+
+    console.log( 'ws message', event.data );
+
+    if ( data.event === 'init' )
+      onInit.call( this, data.data );
+
+    // if ( data.event === 'join' )
+    //   onJoin.call( this, data.data );
+
+    if ( data.event === 'data' )
+      onData.call( this, data.data );
+  }.bind( this ));
+
+  function onInit( data ) {
     clearTimeout( error );
 
     this.files = data.files;
-    var player = data.player;
+    var models = Object.keys( data.players );
+    var model = models[models.length - 1];
+    var player = data.players[model];
 
     this.you = new Player( player.model, player.x, player.y );
 
@@ -166,9 +195,37 @@ Game.prototype.connect = function( gotInit, gotError ) {
     this.graphics.set["sticks"] = this.files.items[0];
 
     gotInit.call( this );
+  }
 
-  }.bind( this ) );
+  function onJoin( data ) {
+    this.players[data.model] = new Player( data.model, data.x, data.y );
+  }
 
+  function onData( data ) {
+    for ( var model in data ) {
+      var player = data[model];
+
+      // don't update your position
+      if ( this.players[model] === this.you )
+        continue;
+
+      if ( !this.players[model] ) {
+        // XXX create player if no join message was received?
+        this.players[model] = new Player( model, player.x, player.y );
+        continue;
+      }
+
+      this.players[model].goTo( player.x, player.y );
+
+    }
+
+    // delete player if he is no longer in data
+    for ( var model in this.players ) {
+      if ( !( model in data ) ) {
+        delete this.players[model];
+      }
+    }
+  }
 }
 
 // To do: Make this function awesome 'cause it's somehow not to good now.
@@ -222,7 +279,7 @@ Game.prototype.loadResources = function( doneLoading ) {
 
 Game.prototype.dataListener = function() {
 
-  server.on( "data", function( data ) {
+  this.on( "data", function( data ) {
     for( var model in data ) {
       if( model === this.model )
         continue;
@@ -241,7 +298,7 @@ Game.prototype.dataListener = function() {
     }
   }.bind( this ) );
 
-  server.on( "join", function( data ) {
+  this.on( "join", function( data ) {
 
   }.bind( this ), false );
 
@@ -266,7 +323,7 @@ Game.prototype.setCanvas = function() {
 Game.prototype.postman = function( stop ) {
 
   // Just for testing.
-  if( server.fake )
+  if( this.ws.fake )
     return;
 
   var updating;
@@ -276,16 +333,17 @@ Game.prototype.postman = function( stop ) {
     return;
   }
 
-  var send = false;
-  var message;
-
   updating = setInterval( function() {
-    // Message system is not ready.
-    server.emit( "update", {
-      x: this.you.getX(),
-      y: this.you.getY()
-    } );
-  }, 1000 );
+    var data = {
+      event: 'pos',
+      data: {
+        x: this.you.getX(),
+        y: this.you.getY(),
+        model: this.you.model,
+      },
+    };
+    this.ws.send( JSON.stringify( data ) );
+  }.bind( this ), 1000 );
 
 }
 
@@ -354,6 +412,9 @@ Game.prototype.drawPlayers = function() { // And chat messages.
 
     player.tick();
 
+    if ( !this.graphics["players"][player.model] )
+      continue;
+
     ctx.drawImage(
       this.graphics["players"][player.model],
       player.getFrame() * PLAYER_WIDTH, player.getDirection() * PLAYER_HEIGHT,
@@ -392,6 +453,9 @@ Game.prototype.drawPoints = function() {
   for( var id in this.players ) {
 
     var player = this.players[id];
+
+    if ( !this.graphics["players"][player.model] )
+      continue;
 
     // Awesome thumbnail. :D
     ctx.drawImage(
