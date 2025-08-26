@@ -173,6 +173,9 @@ Game.prototype.connect = function( gotInit, gotError ) {
     // if ( data.event === 'join' )
     //   onJoin.call( this, data.data );
 
+    // if ( data.event === 'leave' )
+    //   onLeave.call( this, data.data );
+
     if ( data.event === 'data' )
       onData.call( this, data.data );
   }.bind( this ));
@@ -199,6 +202,10 @@ Game.prototype.connect = function( gotInit, gotError ) {
 
   function onJoin( data ) {
     this.players[data.model] = new Player( data.model, data.x, data.y );
+  }
+
+  function onLeave( data ) {
+    delete this.players[data.model];
   }
 
   function onData( data ) {
