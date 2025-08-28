@@ -24,15 +24,20 @@ var sessionParser = session({
 var usedModels = [];
 
 function anotherModel() {
-  var model;
+  var choices = [];
+  initData.files.players.forEach(function(c) {
+    if (!(c in usedModels))
+      choices.push(c);
+  });
 
-  do {
-    model = initData.files.players[initData.files.players.length * Math.random() | 0];
-  } while (false && !(model in usedModels));
+  if (choices.length) {
+    var model = choices[choices.length * Math.random() | 0];
+    usedModels.push(model);
 
-  usedModels.push(model);
+    return model;
+  }
 
-  return model;
+  return null;
 }
 
 var app = function(wss, eapp, server) {
@@ -54,6 +59,12 @@ var app = function(wss, eapp, server) {
 
     var model = anotherModel();
     // XXX var model = req.session.model;
+
+    if (!model) {
+      ws.terminate();
+      return;
+    }
+
     var data = {
       event: 'init',
       data: {
@@ -73,7 +84,7 @@ var app = function(wss, eapp, server) {
 
     gameData.players[model] = data.data.players[model];
 
-    console.log('init', model);
+    console.log('join', model);
     ws.send(JSON.stringify(data));
 
     // send join message to everybody
@@ -112,6 +123,8 @@ var app = function(wss, eapp, server) {
     });
 
     ws.on('close', function() {
+      console.log('leave', model);
+
       // send leave message to everybody
       // wss.clients.forEach(function(client) {
       //   if (client === ws || client.readyState !== ws.OPEN)
@@ -123,7 +136,7 @@ var app = function(wss, eapp, server) {
       //     data: data.data,
       //   };
 
-      //   ws.send(JSON.stringify(joinData));
+      //   ws.send(JSON.stringify(leaveData));
       // });
 
       delete gameData.players[model];
