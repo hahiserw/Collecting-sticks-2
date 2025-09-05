@@ -34,7 +34,8 @@ else {
   server = https.createServer(options, app);
 }
 
-var wss = new ws.Server({server: server});
+// var wss = new ws.Server({server: server});
+var wss = new ws.WebSocketServer({clientTracking: false, noServer: true});
 wsapp(wss, app, server);
 
 /**

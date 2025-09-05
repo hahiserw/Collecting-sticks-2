@@ -1,10 +1,10 @@
 var express = require('express');
 var router = express.Router();
 
-router.get('/', function(req, res, next) {
-  res.render('index', {
-    title: 'Collecting sticks 2',
-  });
-});
+// router.get('/', function(req, res, next) {
+//   res.render('index', {
+//     title: 'Collecting sticks 2',
+//   });
+// });
 
 module.exports = router;

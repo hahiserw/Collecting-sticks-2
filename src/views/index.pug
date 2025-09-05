@@ -1,127 +1,59 @@
 extends layout
 
 block head
-  script(src='scripts/game.js')
-  script(src='scripts/player.js')
+  script(src='/scripts/game.js')
+  script(src='/scripts/player.js')
 
 block content
   script(type='text/javascript').
-    // For testing purpose.
-    var clientTest = {
-      connect: function(){
-        return {
-          on: function( event, done ) {
-            // var doneee = function(){};
-            console.log( "client watching and got:", event );
-            data = {
-              init: {
-                files: {
-                  players: [ "Remilia", "Remilia2", "Asuka", "FunkyPencil", "Milonar", "Wesker" ],
-                  backgrounds: [ "Grass" ],
-                  items: [ "Sticks" ]
-                },
-                player: {
-                  model: "Wesker",
-                  x: 512 / 2 - 32 / 2,
-                  y: 384 / 2 - 32 / 2 + 16,
-                  points: 0
-                }
-              },
-              data: {
-                Remilia: { x: 100, y: 100, message: "Remilia!" }
-              },
-              join: {
-                Wesker: { x: 200, y: 200 }
-              }
-            };
-            done( data[event] );
-          },
-          emit: function( event, data ) {
-            console.log( "client sent:", data );
-          },
-          fake: true
-        };
-      }
-    };
-    var io = io? io: clientTest;
 
-    var uri = 'ws' + (document.location.protocol === 'https:'? 's': '')
-      + '://' + document.location.host + '/';
-
-    var game = new Game(uri);
-
-    document.addEventListener( "DOMContentLoaded", function() {
-
-      game.launch( "canvas", "status" );
-
-    }, false );
-
-    // Player input: http://www.lostdecadegames.com/how-to-make-a-simple-html5-canvas-game/
-    // var writing = false; // Chat coming soon.
-    function keyChange( event ) {
-      var key = event.keyCode;// || event.which || window.event;
-      if( key < 37 || key > 40 )
-        return;
-      var direction = key - 37;
-      game.keys[direction] = ( event.type === "keydown" );
-      event.preventDefault();
+  style.
+    .thumbnail {
+      width: 32px;
+      height: 48px;
+    }
+    .background {
+      /*
+      width: 512px;
+      height: 384px;
+      */
+      width: 256px;
+      height: 192px;
     }
 
-    window.addEventListener( "keydown", keyChange, false );
-    window.addEventListener( "keyup", keyChange, false );
+  form(action='/', method='POST')
 
+    h1 Select your character
+    #character-chooser
+      each model, i in models
+        .form-check.form-check-inline
+          label.form-check-label
+            input.form-check-input(type='radio', name='model', value=model, selected=i===0)
+            = model
+            .thumbnail(style='background: url("/graphics/' + model + '.png")')
 
-  style(type='text/css').
-    body {
-      font-family: Tahoma, Geneva, sans-serif;
-      border: 0;
-      margin: 0;
-      padding: 0;
-    }
+    h1 Join a room
+    #list
+      ul
+        each room, id in rooms
+          li
+            h2= room.name
+            .background.position-relative(style='background: url("graphics/' + room.background + '.png")')
 
-    #wrapper {
-      width: 600px;
-      margin: 0 auto;
-    }
+              for player, model in room.players
+                .thumbnail.position-absolute(style='background: url("/graphics/' + model + '.png")')
 
-    #board {
-      text-align: center;
-    }
+            button.btn.btn-secondary(type='submit', name='submit', value=id) Join
 
-    canvas {
-      margin: 10px 0 10px 0;
-    }
-
-    #status {
-      height: 100px;
-      overflow: auto;
-      padding: 0 3px;
-      border: 1px solid black;
-    }
-
-    #info {
-      margin: 20px 0 20px 0;
-    }
-
-    .title {
-      font-size: 34px;
-      margin: 20px;
-    }
-
-    .stuff {
-    }
-
-
-  .title Collecting sticks 2
-
-  #board
-    canvas#canvas(width=512, height=384)
-      p This browser doesn't support canvas tag. Visit this page in another browser.
-
-    noscript
-      p You won't play withought JS enabled
-
-  #info
-    .stuff Simple collecting game. The sprites come from the internet.
-
-  pre#status Page loaded.
+    h1 Create a room
+    label.form-label Name
+      input.form-control(name='name', type='text', maxlength=FORM_ROOM_NAME_LENGTH)
+    div
+      each background, i in backgrounds
+        .form-check.form-check-inline
+          label.form-check-label
+            input.form-check-input(type='radio', name='background', value=background, selected=i===0)
+            = background
+            .thumbnail(style='background: url("/graphics/' + background + '.png")')
+            //- img(src='/graphics/' + background + '.png')
+    button.btn.btn-primary(type='submit', name='submit', value='new') Create

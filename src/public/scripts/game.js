@@ -154,8 +154,10 @@ Game.prototype.connect = function( gotInit, gotError ) {
 
   this.ws = new WebSocket(this.uri);
 
-  // this.ws.addEventListener( "open", function(event) {
-  // } );
+  this.ws.addEventListener( "open", function(event) {
+    console.log('ws open');
+    // gotInit.call( this );
+  } );
 
   if( !this.ws )
     gotError.call( this, 2 );
@@ -166,6 +168,9 @@ Game.prototype.connect = function( gotInit, gotError ) {
     var data = JSON.parse( event.data );
 
     console.log( 'ws message', event.data );
+
+    if ( data.event === 'error' )
+      onError.call( this, data.data );
 
     if ( data.event === 'init' )
       onInit.call( this, data.data );
@@ -180,22 +185,26 @@ Game.prototype.connect = function( gotInit, gotError ) {
       onData.call( this, data.data );
   }.bind( this ));
 
+  function onError( data ) {
+    this.say( "Server error: " + data.error );
+  }
+
   function onInit( data ) {
     clearTimeout( error );
 
     this.files = data.files;
     var models = Object.keys( data.players );
-    var model = models[models.length - 1];
+    var model = data.model;
     var player = data.players[model];
 
-    this.you = new Player( player.model, player.x, player.y );
+    this.you = new Player( model, player.x, player.y );
 
     // this.players.push( this.you );
     this.players[player.model] = this.you;
 
     // First one.
-    this.graphics.set["background"] = this.files.backgrounds[0];
-    this.graphics.set["sticks"] = this.files.items[0];
+    this.graphics.set["background"] = data.background;
+    this.graphics.set["sticks"] = data.files.items[0];
 
     gotInit.call( this );
   }
@@ -256,7 +265,7 @@ Game.prototype.loadResources = function( doneLoading ) {
       this.say( "Error loading image: " + fileName + extension + "." );
     }.bind( this ), false );
 
-    image.src = "graphics/" + fileName + extension;
+    image.src = "/graphics/" + fileName + extension;
 
   }
 
@@ -356,7 +365,7 @@ Game.prototype.postman = function( stop ) {
 
 Game.prototype.render = function() {
 
-  ctx.drawImage( this.graphics["backgrounds"]["Grass"], 0, 0 );
+  ctx.drawImage( this.graphics["backgrounds"][this.graphics.set.background], 0, 0 );
 
   // this.drawSticks();
 
