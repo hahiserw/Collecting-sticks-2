@@ -10,7 +10,7 @@ var initData = {
   files: {
     // TODO read from graphics folder
     players: ["Remilia", "Remilia2", "Asuka", "FunkyPencil", "Milonar", "Wesker"],
-    backgrounds: ["Grass", "Space"],
+    backgrounds: ["Grass", "Space", "Fourleaf", "Comp"],
     items: ["Sticks"],
   },
 };
