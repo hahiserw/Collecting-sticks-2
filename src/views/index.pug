@@ -17,8 +17,8 @@ block content
       width: 512px;
       height: 384px;
       */
-      width: 256px;
-      height: 192px;
+      width: 512px;
+      height: 48px;
     }
 
   form(action='/', method='POST')
@@ -38,10 +38,9 @@ block content
         each room, id in rooms
           li
             h2= room.name
-            .background.position-relative(style='background: url("graphics/' + room.background + '.png")')
-
-              for player, model in room.players
-                .thumbnail.position-absolute(style='background: url("/graphics/' + model + '.png")')
+            .background(style='background: url("graphics/' + room.background + '.png")')
+              each player, model in room.players
+                .thumbnail.float-start(style='background: url("/graphics/' + model + '.png")')
 
             button.btn.btn-secondary(type='submit', name='submit', value=id) Join
 
