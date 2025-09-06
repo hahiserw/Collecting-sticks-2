@@ -9,22 +9,23 @@ block content
 
   style.
     .thumbnail {
-      width: 32px;
-      height: 48px;
+      width: 32px; /* PLAYER_WIDTH */
+      height: 48px; /* PLAYER_HEIGHT */
     }
     .background {
       /*
       width: 512px;
       height: 384px;
       */
-      width: 512px;
-      height: 48px;
+      width: 512px; /* PLAYER_WIDTH * initData.files.players.length */
+      height: 48px; /* PLAYER_HEIGHT */
     }
 
   form(action='/', method='POST')
 
     h1 Select your character
     #character-chooser
+      p Model
       each model, i in models
         .form-check.form-check-inline
           label.form-check-label
@@ -43,11 +44,14 @@ block content
                 .thumbnail.float-start(style='background: url("/graphics/' + model + '.png")')
 
             button.btn.btn-secondary(type='submit', name='submit', value=id) Join
+      - if (Object.keys(rooms).length === 0)
+        p No one is currently playing, create a room below
 
     h1 Create a room
     label.form-label Name
       input.form-control(name='name', type='text', maxlength=FORM_ROOM_NAME_LENGTH)
     div
+      p Background
       each background, i in backgrounds
         .form-check.form-check-inline
           label.form-check-label

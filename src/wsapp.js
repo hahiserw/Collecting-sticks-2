@@ -85,6 +85,7 @@ var app = function(wss, eapp, server) {
 
     if (submit === 'new') {
       id = Object.keys(gameData).length;
+
       gameData[id] = {
         name: name,
         background: background,
