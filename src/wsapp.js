@@ -94,6 +94,17 @@ var app = function(wss, eapp, server) {
       };
     } else {
       id = parseInt(submit, 10);
+
+      if (!(id in gameData)) {
+        renderError(res, 404, 'No such room');
+        return;
+      }
+
+      if (model in gameData[id].players) {
+        renderError(res, 403, 'Player with the same model is already in the room');
+        return;
+      }
+
       gameData[id].players[model] = newPlayer;
     }
 
@@ -232,6 +243,9 @@ var app = function(wss, eapp, server) {
 
       switch (data.event) {
       case 'pos':
+        // somebody had the same model as another player and left the game
+        if (!(id in gameData) || !(model in gameData[id].players))
+          break;
         // XXX should get relative positions, not absolute, because an evil
         // player might teleport all over the place
         // OR server should check if position changes only slightly
