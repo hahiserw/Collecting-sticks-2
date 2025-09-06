@@ -65,7 +65,7 @@ var app = function(wss, eapp, server) {
 
   eapp.post('/', function(req, res, next) {
     var name = req.body.name || '';
-    const background = req.body.background || '';
+    const background = req.body.background || initData.files.backgrounds[0];
     const submit = req.body.submit || 'new';
     const model = req.body.model || getAnotherAvailableModel();
 
@@ -160,7 +160,7 @@ var app = function(wss, eapp, server) {
 
     console.log('ws request', req.url, id);
 
-    if (isNaN(id)) {
+    if (!(id in gameData)) {
       ws.send(JSON.stringify({event: 'error', data: {error: 'No such game'}}));
       ws.terminate();
       return;
