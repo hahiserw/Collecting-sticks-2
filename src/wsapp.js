@@ -3,6 +3,7 @@ const FORM_ROOM_NAME_LENGTH = 50;
 var ws = require('ws');
 var session = require('express-session');
 var createError = require('http-errors');
+var Player = require('./lib/player');
 
 var gameData = {};
 
@@ -72,14 +73,11 @@ var app = function(wss, eapp, server) {
     // validate?
     name = name.substring(0, FORM_ROOM_NAME_LENGTH).trim();
 
-    const newPlayer = {
-      [model]: {
-        model: model,
-        x: (512 - 32) * Math.random() | 0,
-        y: (384 - 32 - 16) * Math.random() | 0,
-        points: 0,
-      },
-    };
+    const player = new Player(
+      model,
+      (512 - 32) * Math.random() | 0,
+      (384 - 32 - 16) * Math.random() | 0,
+    );
 
     var id = 0;
 
@@ -90,7 +88,7 @@ var app = function(wss, eapp, server) {
         name: name,
         background: background,
         players: {
-          [model]: newPlayer,
+          [model]: player,
         },
       };
     } else {
@@ -106,7 +104,7 @@ var app = function(wss, eapp, server) {
         return;
       }
 
-      gameData[id].players[model] = newPlayer;
+      gameData[id].players[model] = player;
     }
 
     req.session.gameId = id;
@@ -184,21 +182,7 @@ var app = function(wss, eapp, server) {
       return;
     }
 
-    // if (model in gameData[id].players) {
-    //   ws.send(JSON.stringify({event: 'error', data: {error: 'Player already in game'}}));
-    //   ws.terminate();
-    //   return;
-    // }
-
-    // new player
-    gameData[id].players[model] = {
-      model: model,
-      // TODO get from some consts
-      x: (512 - 32) * Math.random() | 0,
-      y: (384 - 32 - 16) * Math.random() | 0,
-      points: 0,
-      ws: ws,
-    };
+    gameData[id].players[model].setWs(ws);
 
     var data = {
       event: 'init',
@@ -210,12 +194,7 @@ var app = function(wss, eapp, server) {
       },
     };
 
-    data.data.players[model] = {
-      model: model,
-      x: gameData[id].players[model].x,
-      y: gameData[id].players[model].y,
-      points: gameData[id].players[model].points,
-    };
+    data.data.players[model] = gameData[id].players[model].getData();
 
     console.log(id, 'join', model);
     ws.send(JSON.stringify(data));
@@ -290,16 +269,11 @@ var app = function(wss, eapp, server) {
       var data = {};
 
       for (var model in players) {
-        data[model] = {
-          model: model,
-          x: players[model].x,
-          y: players[model].y,
-          points: players[model].points,
-        };
+        data[model] = players[model].getData();
       }
 
       for (var model in players) {
-        const ws = players[model].ws;
+        const ws = players[model].getWs();
 
         if (!ws)
           continue;
