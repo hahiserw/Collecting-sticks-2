@@ -20,7 +20,9 @@ var
   MAP_WIDTH = 512,
   MAP_HEIGHT = 384,
   PLAYER_WIDTH = 32,
-  PLAYER_HEIGHT = 48;
+  PLAYER_HEIGHT = 48,
+  STICK_WIDTH = 32,
+  STICK_HEIGHT = 32;
 
 
 var Game = function(uri) {
@@ -30,6 +32,8 @@ var Game = function(uri) {
 
   this.players = {};
 
+  this.sticks = [];
+
   this.keys = [];
 
   this.files = {};
@@ -38,7 +42,7 @@ var Game = function(uri) {
     set: {},
     players: {},
     backgrounds: {},
-    items: {}
+    sticks: [],
   };
 
 };
@@ -204,7 +208,7 @@ Game.prototype.connect = function( gotInit, gotError ) {
 
     // First one.
     this.graphics.set["background"] = data.background;
-    this.graphics.set["sticks"] = data.files.items[0];
+    this.graphics.set["sticks"] = data.files.sticks[0];
 
     gotInit.call( this );
   }
@@ -218,18 +222,19 @@ Game.prototype.connect = function( gotInit, gotError ) {
   }
 
   function onData( data ) {
-    for ( var model in data ) {
-      var player = data[model];
-
-      // don't update your position
-      if ( this.players[model] === this.you )
-        continue;
+    for ( var model in data.players ) {
+      var player = data.players[model];
 
       if ( !this.players[model] ) {
         // XXX create player if no join message was received?
         this.players[model] = new Player( model, player.x, player.y );
-        continue;
       }
+
+      this.players[model].setPoints( player.points );
+
+      // don't update your position
+      if ( this.players[model] === this.you )
+        continue;
 
       this.players[model].goTo( player.x, player.y );
 
@@ -237,9 +242,15 @@ Game.prototype.connect = function( gotInit, gotError ) {
 
     // delete player if he is no longer in data
     for ( var model in this.players ) {
-      if ( !( model in data ) ) {
+      if ( !( model in data.players ) ) {
         delete this.players[model];
       }
+    }
+
+    for ( var i = 0; i < data.sticks.length; i++ ) {
+      var stick = data.sticks[i];
+      delete this.sticks[i];
+      this.sticks[i] = new Stick( stick.model, stick.x, stick.y );
     }
   }
 }
@@ -367,7 +378,7 @@ Game.prototype.render = function() {
 
   ctx.drawImage( this.graphics["backgrounds"][this.graphics.set.background], 0, 0 );
 
-  // this.drawSticks();
+  this.drawSticks();
 
   this.playerMove();
 
@@ -379,7 +390,24 @@ Game.prototype.render = function() {
 
 Game.prototype.drawSticks = function() {
 
-  // Damn, nothing.
+  for( var i = 0; i < this.sticks.length; i++ ) {
+    var stick = this.sticks[i];
+    var
+      x = stick.x,
+      y = stick.y;
+
+    if ( !this.graphics["sticks"]["Sticks"] ) {
+      throw new Error( "Can't find stick graphic" );
+      return;
+    }
+
+    ctx.drawImage(
+      this.graphics["sticks"]["Sticks"],
+      stick.model * STICK_WIDTH, 0,
+      STICK_WIDTH, STICK_HEIGHT,
+      x, y,
+      STICK_WIDTH, STICK_HEIGHT );
+  }
 
 }
 
@@ -428,8 +456,10 @@ Game.prototype.drawPlayers = function() { // And chat messages.
 
     player.tick();
 
-    if ( !this.graphics["players"][player.model] )
+    if ( !this.graphics["players"][player.model] ) {
+      throw new Error( "Can't find player " + player.model + " graphic" );
       continue;
+    }
 
     ctx.drawImage(
       this.graphics["players"][player.model],
@@ -470,8 +500,10 @@ Game.prototype.drawPoints = function() {
 
     var player = this.players[id];
 
-    if ( !this.graphics["players"][player.model] )
+    if ( !this.graphics["players"][player.model] ) {
+      throw new Error( "Can't find player " + player.model + " graphic" );
       continue;
+    }
 
     // Awesome thumbnail. :D
     ctx.drawImage(

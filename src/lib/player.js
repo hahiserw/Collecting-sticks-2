@@ -1,7 +1,10 @@
+var c = require('../consts');
+var Entity = require('./entity');
+
 var Player = function(model, x, y) {
+  Entity.call(this, x, y, c.PLAYER_WIDTH, c.PLAYER_HEIGHT);
+
   this.model = model;
-  this.x = x;
-  this.y = y;
   this.points = 0;
 
   this.ws = null;
@@ -23,5 +26,7 @@ Player.prototype.setWs = function(ws) {
 Player.prototype.getWs = function() {
   return this.ws;
 };
+
+Object.setPrototypeOf(Player.prototype, Entity.prototype);
 
 module.exports = Player;

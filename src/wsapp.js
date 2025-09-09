@@ -1,9 +1,10 @@
-const FORM_ROOM_NAME_LENGTH = 50;
+var c = require('./consts');
 
 var ws = require('ws');
 var session = require('express-session');
 var createError = require('http-errors');
 var Player = require('./lib/player');
+var Stick = require('./lib/stick');
 
 var gameData = {};
 
@@ -12,7 +13,7 @@ var initData = {
     // TODO read from graphics folder
     players: ["Remilia", "Remilia2", "Asuka", "FunkyPencil", "Milonar", "Wesker"],
     backgrounds: ["Grass", "Space", "Fourleaf", "Comp"],
-    items: ["Sticks"],
+    sticks: ["Sticks"],
   },
 };
 
@@ -60,7 +61,7 @@ var app = function(wss, eapp, server) {
       models: initData.files.players,
       backgrounds: initData.files.backgrounds,
       rooms: gameData,
-      FORM_ROOM_NAME_LENGTH: FORM_ROOM_NAME_LENGTH,
+      FORM_ROOM_NAME_LENGTH: c.FORM_ROOM_NAME_LENGTH,
     });
   });
 
@@ -71,12 +72,12 @@ var app = function(wss, eapp, server) {
     const model = req.body.model || getAnotherAvailableModel();
 
     // validate?
-    name = name.substring(0, FORM_ROOM_NAME_LENGTH).trim();
+    name = name.substring(0, c.FORM_ROOM_NAME_LENGTH).trim();
 
     const player = new Player(
       model,
-      (512 - 32) * Math.random() | 0,
-      (384 - 32 - 16) * Math.random() | 0,
+      (c.BOARD_WIDTH - c.PLAYER_WIDTH) * Math.random() | 0,
+      (c.BOARD_HEIGHT - c.PLAYER_HEIGHT) * Math.random() | 0,
     );
 
     var id = 0;
@@ -90,6 +91,8 @@ var app = function(wss, eapp, server) {
         players: {
           [model]: player,
         },
+        sticks: [],
+        simultaneousSticks: 2, // TODO get from the form
       };
     } else {
       id = parseInt(submit, 10);
@@ -216,6 +219,14 @@ var app = function(wss, eapp, server) {
     ws.on('message', function(message) {
       // console.log('ws message', message.toString());
 
+      var players = gameData[id].players;
+      var sticks = gameData[id].sticks;
+
+      if (!(id in gameData) || !(model in players))
+        return;
+
+      var player = players[model];
+
       var data = {event: '', data: {}};
       try {
         data = JSON.parse(message);
@@ -223,14 +234,34 @@ var app = function(wss, eapp, server) {
 
       switch (data.event) {
       case 'pos':
-        // somebody had the same model as another player and left the game
-        if (!(id in gameData) || !(model in gameData[id].players))
-          break;
-        // XXX should get relative positions, not absolute, because an evil
-        // player might teleport all over the place
-        // OR server should check if position changes only slightly
-        gameData[id].players[model].x = data.data.x;
-        gameData[id].players[model].y = data.data.y;
+        // XXX server should check if position changes only slightly
+        // no teleportation allowed :)
+        player.x = data.data.x;
+        player.y = data.data.y;
+
+        // check if player is colliding with a stick and if so, add points and
+        // remove the stick
+        var toDelete = [];
+        for (var innerModel in players) {
+          var innerPlayer = players[innerModel];
+
+          for (var i = 0; i < sticks.length; i++) {
+            var stick = sticks[i];
+
+            if (innerPlayer.isCollidingWith(stick)) {
+              innerPlayer.points++;
+              toDelete.push(i);
+            }
+          }
+        }
+
+        var newSticks = [];
+        for (var i = 0; i < sticks.length; i++) {
+          if (toDelete.indexOf(i) === -1)
+            newSticks.push(sticks[i]);
+        }
+
+        gameData[id].sticks = newSticks;
         break;
       }
     });
@@ -265,11 +296,16 @@ var app = function(wss, eapp, server) {
     // send room data to every player in the room
     for (var id in gameData) {
       const players = gameData[id].players;
+      const sticks = gameData[id].sticks;
 
-      var data = {};
+      var data = {players: {}, sticks: []};
 
       for (var model in players) {
-        data[model] = players[model].getData();
+        data.players[model] = players[model].getData();
+      }
+
+      for (var i = 0; i < sticks.length; i++) {
+        data.sticks[i] = sticks[i].getData();
       }
 
       for (var model in players) {
@@ -284,7 +320,22 @@ var app = function(wss, eapp, server) {
         }));
       }
     }
-  }, 1000);
+  }, c.TIME_DATA_BROADCAST);
+
+  setInterval(function() {
+    for (var id in gameData) {
+      var sticks = gameData[id].sticks;
+
+      for (var i = 0; i < gameData[id].simultaneousSticks - sticks.length; i++) {
+        // TODO generate position again if the stick is colliding with a player
+        sticks.push(new Stick(
+          Math.random() * 2 | 0,
+          Math.random() * (c.BOARD_WIDTH - c.STICK_WIDTH) | 0,
+          Math.random() * (c.BOARD_HEIGHT - c.STICK_HEIGHT) | 0,
+        ));
+      }
+    }
+  }, c.TIME_STICK_GENERATE);
 }
 
 module.exports = app;
