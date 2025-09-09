@@ -73,56 +73,20 @@ block content
 
 
   style(type='text/css').
-    body {
-      font-family: Tahoma, Geneva, sans-serif;
-      border: 0;
-      margin: 0;
-      padding: 0;
-    }
-
-    #wrapper {
-      width: 600px;
-      margin: 0 auto;
-    }
-
-    #board {
-      text-align: center;
-    }
-
-    canvas {
-      margin: 10px 0 10px 0;
-    }
-
     #status {
       height: 100px;
-      overflow: auto;
-      padding: 0 3px;
-      border: 1px solid black;
     }
 
-    #info {
-      margin: 20px 0 20px 0;
-    }
+  h1 Collecting sticks 2
 
-    .title {
-      font-size: 34px;
-      margin: 20px;
-    }
-
-    .stuff {
-    }
-
-
-  .title Collecting sticks 2
-
-  #board
+  .text-center
     canvas#canvas(width=512, height=384)
       p This browser doesn't support canvas tag. Visit this page in another browser.
 
     noscript
       p You won't play withought JS enabled
 
-  #info
-    .stuff Simple collecting game. The sprites come from the internet.
+  p.
+    Simple collecting game. The sprites come from the internet.
 
-  pre#status Page loaded.
+  pre#status.overflow-auto.border.border-black.px-1 Page loaded.

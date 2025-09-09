@@ -59,4 +59,9 @@ block content
             = background
             .thumbnail(style='background: url("/graphics/' + background + '.png")')
             //- img(src='/graphics/' + background + '.png')
+    div
+      label.form-label Simultaneous sticks
+        select.form-select(name='simultaneousSticks')
+          - for (var i = 1; i <= FORM_SIMULTANEOUS_STICKS_MAX; i++)
+            option(value=i, selected=i===2)= i
     button.btn.btn-primary(type='submit', name='submit', value='new') Create

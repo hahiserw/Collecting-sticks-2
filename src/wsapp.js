@@ -62,6 +62,8 @@ var app = function(wss, eapp, server) {
       backgrounds: initData.files.backgrounds,
       rooms: gameData,
       FORM_ROOM_NAME_LENGTH: c.FORM_ROOM_NAME_LENGTH,
+      FORM_SIMULTANEOUS_STICKS_MIN: c.FORM_SIMULTANEOUS_STICKS_MIN,
+      FORM_SIMULTANEOUS_STICKS_MAX: c.FORM_SIMULTANEOUS_STICKS_MAX,
     });
   });
 
@@ -70,6 +72,13 @@ var app = function(wss, eapp, server) {
     const background = req.body.background || initData.files.backgrounds[0];
     const submit = req.body.submit || 'new';
     const model = req.body.model || getAnotherAvailableModel();
+    var simultaneousSticks = req.body.simultaneousSticks || 2;
+
+    // clamp
+    simultaneousSticks = Math.min(
+      Math.max(simultaneousSticks, c.FORM_SIMULTANEOUS_STICKS_MIN),
+      c.FORM_SIMULTANEOUS_STICKS_MAX
+    );
 
     // validate?
     name = name.substring(0, c.FORM_ROOM_NAME_LENGTH).trim();
@@ -92,7 +101,7 @@ var app = function(wss, eapp, server) {
           [model]: player,
         },
         sticks: [],
-        simultaneousSticks: 2, // TODO get from the form
+        simultaneousSticks: simultaneousSticks,
       };
     } else {
       id = parseInt(submit, 10);
