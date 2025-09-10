@@ -15,16 +15,6 @@ game
 
 var log, canvas, ctx; // OMG
 
-// Constants.
-var
-  MAP_WIDTH = 512,
-  MAP_HEIGHT = 384,
-  PLAYER_WIDTH = 32,
-  PLAYER_HEIGHT = 48,
-  STICK_WIDTH = 32,
-  STICK_HEIGHT = 32;
-
-
 var Game = function(uri) {
   this.uri = uri;
 
@@ -333,8 +323,8 @@ Game.prototype.dataListener = function() {
 
 Game.prototype.setCanvas = function() {
 
-  canvas.width = MAP_WIDTH;
-  canvas.height = MAP_HEIGHT;
+  canvas.width = BOARD_WIDTH;
+  canvas.height = BOARD_HEIGHT;
 
   ctx.font = "20px monospace";
 
@@ -517,7 +507,7 @@ Game.prototype.drawPoints = function() {
     ctx.fillText( player.getPoints(), x + 40, y + 30/*, width*/ );
 
     // In case too many players plays.
-    if( y + 2 * spaceY > MAP_HEIGHT - spaceY ) {
+    if( y + 2 * spaceY > BOARD_HEIGHT - spaceY ) {
       x += spaceX;
       y = 0;
     } else {

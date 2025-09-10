@@ -64,6 +64,8 @@ var app = function(wss, eapp, server) {
       FORM_ROOM_NAME_LENGTH: c.FORM_ROOM_NAME_LENGTH,
       FORM_SIMULTANEOUS_STICKS_MIN: c.FORM_SIMULTANEOUS_STICKS_MIN,
       FORM_SIMULTANEOUS_STICKS_MAX: c.FORM_SIMULTANEOUS_STICKS_MAX,
+      PLAYER_WIDTH: c.PLAYER_WIDTH,
+      PLAYER_HEIGHT: c.PLAYER_HEIGHT,
     });
   });
 
@@ -92,6 +94,11 @@ var app = function(wss, eapp, server) {
     var id = 0;
 
     if (submit === 'new') {
+      if (!name) {
+        renderError(res, 403, 'Invalid room name');
+        return;
+      }
+
       id = Object.keys(gameData).length;
 
       gameData[id] = {
@@ -138,6 +145,23 @@ var app = function(wss, eapp, server) {
       title: 'Collecting sticks 2',
       data: data,
     });
+  });
+
+  eapp.get('/stylesheets/style.css', function(req, res, next) {
+    res.type('css');
+    res.send('.thumbnail { width: ' + c.PLAYER_WIDTH + 'px; height: '
+      + c.PLAYER_HEIGHT + 'px; }\n'
+      + '.background { width: '
+      + (c.PLAYER_WIDTH * initData.files.players.length) + 'px; height: '
+      + (c.PLAYER_HEIGHT) + 'px; }\n');
+  });
+
+  eapp.get('/scripts/consts.js', function(req, res, next) {
+    var consts = '';
+    for (var v in c)
+      consts += 'const ' + v + ' = ' + c[v] + ';\n';
+    res.type('js');
+    res.send(consts);
   });
 
   // catch 404 and forward to error handler

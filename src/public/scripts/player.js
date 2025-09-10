@@ -43,9 +43,9 @@ var Player = function( model, startX, startY ) {
     if( x && y )
       return;
 
-    if( x && this.x + x >= 0 && this.x + x + PLAYER_WIDTH <= MAP_WIDTH )
+    if( x && this.x + x >= 0 && this.x + x + PLAYER_WIDTH <= BOARD_WIDTH )
       this.x += x;
-    if( y && this.y + y >= 0 && this.y + y + PLAYER_HEIGHT <= MAP_HEIGHT )
+    if( y && this.y + y >= 0 && this.y + y + PLAYER_HEIGHT <= BOARD_HEIGHT )
       this.y += y;
 
     if( x < 0 )
@@ -73,10 +73,10 @@ var Player = function( model, startX, startY ) {
       x = 0;
     if( y < 0 )
       y = 0;
-    if( x + PLAYER_WIDTH > MAP_WIDTH )
-      x = MAP_WIDTH - PLAYER_WIDTH;
-    if( y + PLAYER_HEIGHT > MAP_HEIGHT )
-      y = MAP_HEIGHT - PLAYER_HEIGHT;
+    if( x + PLAYER_WIDTH > BOARD_WIDTH )
+      x = BOARD_WIDTH - PLAYER_WIDTH;
+    if( y + PLAYER_HEIGHT > BOARD_HEIGHT )
+      y = BOARD_HEIGHT - PLAYER_HEIGHT;
 
     destX = x;
     destY = y;
