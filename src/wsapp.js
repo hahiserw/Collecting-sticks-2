@@ -11,7 +11,7 @@ var gameData = {};
 var initData = {
   files: {
     // TODO read from graphics folder
-    players: ["Remilia", "Remilia2", "Asuka", "FunkyPencil", "Milonar", "Wesker"],
+    players: ["Remilia", "Remilia2", "Asuka", "FunkyPencil", "Milonar", "Wesker", "Maylene", "Aluxes"],
     backgrounds: ["Grass", "Space", "Fourleaf", "Comp"],
     sticks: ["Sticks"],
   },

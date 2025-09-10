@@ -27,8 +27,8 @@ block content
                 .thumbnail.float-start(style='background: url("/graphics/' + model + '.png")')
 
             button.btn.btn-secondary(type='submit', name='submit', value=id) Join
-      - if (Object.keys(rooms).length === 0)
-        p No one is currently playing, create a room below
+        else
+          li No one is currently playing, create a room below
 
     h1 Create a room
     label.form-label Name
