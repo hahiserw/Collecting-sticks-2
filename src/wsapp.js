@@ -170,6 +170,12 @@ var app = function(wss, eapp, server) {
     res.send(consts);
   });
 
+  eapp.get('/about', function(req, res, next) {
+    res.render('about', {
+      title: 'Collecting sticks 2 - About',
+    });
+  });
+
   // catch 404 and forward to error handler
   eapp.use(function(req, res, next) {
     next(createError(404));
