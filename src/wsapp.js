@@ -124,7 +124,7 @@ var app = function(wss, eapp, server) {
         return;
       }
 
-      if (model in gameData[id].players) {
+      if (!model || (model in gameData[id].players)) {
         renderError(res, 403, 'Player with the same model is already in the room');
         return;
       }

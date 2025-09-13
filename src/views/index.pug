@@ -12,7 +12,7 @@ block content
       each model, i in files.players
         .form-check.form-check-inline
           label.form-check-label
-            input.form-check-input(type='radio', name='model', value=model, checked=i===0)
+            input.form-check-input(type='radio', name='model', value=model)
             = model
             .thumbnail(style='background: url("/graphics/players/' + model + '.png")')
 
