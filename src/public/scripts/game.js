@@ -360,7 +360,7 @@ Game.prototype.postman = function( stop ) {
       },
     };
     this.ws.send( JSON.stringify( data ) );
-  }.bind( this ), 1000 );
+  }.bind( this ), TIME_CLIENT_DATA_BROADCAST );
 
 }
 

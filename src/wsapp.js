@@ -358,14 +358,28 @@ var app = function(wss, eapp, server) {
   setInterval(function() {
     for (var id in gameData) {
       var sticks = gameData[id].sticks;
+      var players = gameData[id].players;
 
       for (var i = 0; i < gameData[id].simultaneousSticks - sticks.length; i++) {
-        // TODO generate position again if the stick is colliding with a player
-        sticks.push(new Stick(
-          Math.random() * 2 | 0,
-          Math.random() * (c.BOARD_WIDTH - c.STICK_WIDTH) | 0,
-          Math.random() * (c.BOARD_HEIGHT - c.STICK_HEIGHT) | 0,
-        ));
+        // generate position again if the stick is colliding with a player
+        var x, y, stick, again;
+        do {
+          again = false;
+          x = Math.random() * (c.BOARD_WIDTH - c.STICK_WIDTH) | 0;
+          y = Math.random() * (c.BOARD_HEIGHT - c.STICK_HEIGHT) | 0
+          stick = new Stick(Math.random() * 2 | 0, x, y);
+
+          for (var model in players) {
+            var player = players[model];
+
+            if (again)
+              break;
+            else
+              again = stick.isCollidingWith(player);
+          }
+        } while(again);
+
+        sticks.push(stick);
       }
     }
   }, c.TIME_STICK_GENERATE);
