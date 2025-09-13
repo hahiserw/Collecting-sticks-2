@@ -266,7 +266,7 @@ Game.prototype.loadResources = function( doneLoading ) {
       this.say( "Error loading image: " + fileName + extension + "." );
     }.bind( this ), false );
 
-    image.src = "/graphics/" + fileName + extension;
+    image.src = "/graphics/" + type + "/" + fileName + extension;
 
   }
 

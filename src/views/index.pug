@@ -9,12 +9,12 @@ block content
     h1 Select your character
     #character-chooser
       div Model
-      each model, i in models
+      each model, i in files.players
         .form-check.form-check-inline
           label.form-check-label
             input.form-check-input(type='radio', name='model', value=model, checked=i===0)
             = model
-            .thumbnail(style='background: url("/graphics/' + model + '.png")')
+            .thumbnail(style='background: url("/graphics/players/' + model + '.png")')
 
     h1 Join a room
     #list
@@ -22,9 +22,9 @@ block content
         each room, id in rooms
           li
             h2= room.name
-            .background(style='background: url("graphics/' + room.background + '.png")')
+            .background(style='background: url("graphics/backgrounds/' + room.background + '.png")')
               each player, model in room.players
-                .thumbnail.float-start(style='background: url("/graphics/' + model + '.png")')
+                .thumbnail.float-start(style='background: url("/graphics/players/' + model + '.png")')
 
             button.btn.btn-secondary(type='submit', name='submit', value=id) Join
         else
@@ -35,12 +35,12 @@ block content
       input.form-control(name='name', type='text', maxlength=FORM_ROOM_NAME_LENGTH)
     div
       div Background
-      each background, i in backgrounds
+      each background, i in files.backgrounds
         .form-check.form-check-inline
           label.form-check-label
             input.form-check-input(type='radio', name='background', value=background, checked=i===0)
             = background
-            .thumbnail(style='background: url("/graphics/' + background + '.png")')
+            .thumbnail(style='background: url("/graphics/backgrounds/' + background + '.png")')
             //- img(src='/graphics/' + background + '.png')
     div
       label.form-label Simultaneous sticks

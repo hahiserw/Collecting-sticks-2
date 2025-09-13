@@ -1,5 +1,6 @@
 var c = require('./consts');
 
+var fs = require('fs');
 var ws = require('ws');
 var session = require('express-session');
 var createError = require('http-errors');
@@ -8,14 +9,20 @@ var Stick = require('./lib/stick');
 
 var gameData = {};
 
-var initData = {
-  files: {
-    // TODO read from graphics folder
-    players: ["Remilia", "Remilia2", "Asuka", "FunkyPencil", "Milonar", "Wesker", "Maylene", "Aluxes"],
-    backgrounds: ["Grass", "Space", "Fourleaf", "Comp"],
-    sticks: ["Sticks"],
-  },
+var files = {
+  players: [],
+  backgrounds: [],
+  sticks: [],
 };
+
+// read file names without extensions
+for (folder in files) {
+  files[folder] = fs.readdirSync('./src/public/graphics/' + folder);
+  for (file in files[folder]) {
+    var f = files[folder][file];
+    files[folder][file] = f.substring(0, f.indexOf('.'));
+  }
+}
 
 var sessionParser = session({
   saveUninitialized: false,
@@ -27,7 +34,7 @@ var usedModels = [];
 
 function getAnotherAvailableModel() {
   var choices = [];
-  initData.files.players.forEach(function(c) {
+  files.players.forEach(function(c) {
     if (!(c in usedModels))
       choices.push(c);
   });
@@ -58,8 +65,7 @@ var app = function(wss, eapp, server) {
   eapp.get('/', function(req, res, next) {
     res.render('index', {
       title: 'Collecting sticks 2',
-      models: initData.files.players,
-      backgrounds: initData.files.backgrounds,
+      files: files,
       rooms: gameData,
       FORM_ROOM_NAME_LENGTH: c.FORM_ROOM_NAME_LENGTH,
       FORM_SIMULTANEOUS_STICKS_MIN: c.FORM_SIMULTANEOUS_STICKS_MIN,
@@ -71,7 +77,7 @@ var app = function(wss, eapp, server) {
 
   eapp.post('/', function(req, res, next) {
     var name = req.body.name || '';
-    const background = req.body.background || initData.files.backgrounds[0];
+    const background = req.body.background || files.backgrounds[0];
     const submit = req.body.submit || 'new';
     const model = req.body.model || getAnotherAvailableModel();
     var simultaneousSticks = req.body.simultaneousSticks || 2;
@@ -152,7 +158,7 @@ var app = function(wss, eapp, server) {
     res.send('.thumbnail { width: ' + c.PLAYER_WIDTH + 'px; height: '
       + c.PLAYER_HEIGHT + 'px; }\n'
       + '.background { width: '
-      + (c.PLAYER_WIDTH * initData.files.players.length) + 'px; height: '
+      + (c.PLAYER_WIDTH * files.players.length) + 'px; height: '
       + (c.PLAYER_HEIGHT) + 'px; }\n');
   });
 
@@ -223,7 +229,7 @@ var app = function(wss, eapp, server) {
     var data = {
       event: 'init',
       data: {
-        files: initData.files,
+        files: files,
         players: {},
         background: gameData[id].background,
         model: model,
