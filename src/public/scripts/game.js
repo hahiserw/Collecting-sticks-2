@@ -163,19 +163,19 @@ Game.prototype.connect = function( gotInit, gotError ) {
 
     console.log( 'ws message', event.data );
 
-    if ( data.event === 'error' )
+    if( data.event === 'error' )
       onError.call( this, data.data );
 
-    if ( data.event === 'init' )
+    if( data.event === 'init' )
       onInit.call( this, data.data );
 
-    // if ( data.event === 'join' )
+    // if( data.event === 'join' )
     //   onJoin.call( this, data.data );
 
-    // if ( data.event === 'leave' )
+    // if( data.event === 'leave' )
     //   onLeave.call( this, data.data );
 
-    if ( data.event === 'data' )
+    if( data.event === 'data' )
       onData.call( this, data.data );
   }.bind( this ));
 
@@ -212,10 +212,10 @@ Game.prototype.connect = function( gotInit, gotError ) {
   }
 
   function onData( data ) {
-    for ( var model in data.players ) {
+    for( var model in data.players ) {
       var player = data.players[model];
 
-      if ( !this.players[model] ) {
+      if( !this.players[model] ) {
         // XXX create player if no join message was received?
         this.players[model] = new Player( model, player.x, player.y );
       }
@@ -223,7 +223,7 @@ Game.prototype.connect = function( gotInit, gotError ) {
       this.players[model].setPoints( player.points );
 
       // don't update your position
-      if ( this.players[model] === this.you )
+      if( this.players[model] === this.you )
         continue;
 
       this.players[model].goTo( player.x, player.y );
@@ -231,13 +231,13 @@ Game.prototype.connect = function( gotInit, gotError ) {
     }
 
     // delete player if he is no longer in data
-    for ( var model in this.players ) {
-      if ( !( model in data.players ) ) {
+    for( var model in this.players ) {
+      if( !( model in data.players ) ) {
         delete this.players[model];
       }
     }
 
-    for ( var i = 0; i < data.sticks.length; i++ ) {
+    for( var i = 0; i < data.sticks.length; i++ ) {
       var stick = data.sticks[i];
       delete this.sticks[i];
       this.sticks[i] = new Stick( stick.model, stick.x, stick.y );
@@ -386,7 +386,7 @@ Game.prototype.drawSticks = function() {
       x = stick.x,
       y = stick.y;
 
-    if ( !this.graphics["sticks"]["Sticks"] ) {
+    if( !this.graphics["sticks"]["Sticks"] ) {
       throw new Error( "Can't find stick graphic" );
       return;
     }
@@ -446,7 +446,7 @@ Game.prototype.drawPlayers = function() { // And chat messages.
 
     player.tick();
 
-    if ( !this.graphics["players"][player.model] ) {
+    if( !this.graphics["players"][player.model] ) {
       throw new Error( "Can't find player " + player.model + " graphic" );
       continue;
     }
@@ -490,7 +490,7 @@ Game.prototype.drawPoints = function() {
 
     var player = this.players[id];
 
-    if ( !this.graphics["players"][player.model] ) {
+    if( !this.graphics["players"][player.model] ) {
       throw new Error( "Can't find player " + player.model + " graphic" );
       continue;
     }
