@@ -37,7 +37,7 @@ var Game = function(uri) {
 
 };
 
-Game.prototype.say = function( text ) {
+Game.prototype.log = function( text ) {
 
   var now = new Date();
   var
@@ -81,35 +81,35 @@ Game.prototype.init = function( canvasId, statusId, done ) {
   log = document.getElementById( statusId );
 
   // TODO rewrite to use promises
-  this.say( "Initializing Game..." );
-  this.say( "Creating Game environment." );
+  this.log( "Initializing Game..." );
+  this.log( "Creating Game environment." );
   this.initCanvas( canvasId );
-  this.say( "Connecting to server..." );
+  this.log( "Connecting to server..." );
   this.connect( function() {
-    this.say( "Connected." );
-    this.say( "Starting listening for players data change." );
+    this.log( "Connected." );
+    this.log( "Starting listening for players data change." );
     this.dataListener();
-    this.say( "Loading resources..." );
+    this.log( "Loading resources..." );
     this.loadResources( function() {
-      this.say( "Done loading all resources." );
-      this.say( "Preparing Game environment." );
+      this.log( "Done loading all resources." );
+      this.log( "Preparing Game environment." );
       this.setCanvas();
-      this.say( "Environment prepared." );
-      this.say( "Starting update function." );
+      this.log( "Environment prepared." );
+      this.log( "Starting update function." );
       this.postman();
-      this.say( "Launching Game." );
+      this.log( "Launching Game." );
       done.call( this );
     }.bind( this ) );
   }.bind( this ), function( error ) {
     switch( error.number ) {
       case 1:
-        this.say( "Server is on. Yet cannot connect." );
+        this.log( "Server is on. Yet cannot connect." );
         break;
       case 2:
-        this.say( "Server is probably down." );
+        this.log( "Server is probably down." );
         break;
       default:
-        this.say( "Unknown server error." );
+        this.log( "Unknown server error." );
     }
   } );
 
@@ -121,10 +121,10 @@ Game.prototype.initCanvas = function( id ) {
   ctx = canvas.getContext( "2d" );
 
   if( !canvas )
-    this.say( "Lol, canvas problem? What noob did let it happen?" );
+    this.log( "Lol, canvas problem? What noob did let it happen?" );
 
   if( !ctx )
-    this.say( "Cannot create canvas context. Try another browser." );
+    this.log( "Cannot create canvas context. Try another browser." );
 
 }
 
@@ -142,7 +142,7 @@ Game.prototype.connect = function( gotInit, gotError ) {
       gotError.call( this, 1 );
       clearTimeout( error );
     } else {
-      this.say( "Trying to connect..." );
+      this.log( "Trying to connect..." );
     }
   }.bind( this ), 1000 );
 
@@ -180,7 +180,7 @@ Game.prototype.connect = function( gotInit, gotError ) {
   }.bind( this ));
 
   function onError( data ) {
-    this.say( "Server error: " + data.error );
+    this.log( "Server error: " + data.error );
   }
 
   function onInit( data ) {
@@ -222,6 +222,8 @@ Game.prototype.connect = function( gotInit, gotError ) {
 
       this.players[model].setPoints( player.points );
 
+      this.players[model].say( player.message );
+
       // don't update your position
       if( this.players[model] === this.you )
         continue;
@@ -258,12 +260,12 @@ Game.prototype.loadResources = function( doneLoading ) {
     var image = new Image();
 
     image.addEventListener( "load", function() {
-      this.say( "Loaded succesfuly: " + fileName + extension + "." );
+      this.log( "Loaded succesfuly: " + fileName + extension + "." );
       loaded.call( this, type, fileName, image );
     }.bind( this ), false );
 
     image.addEventListener( "error", function() {
-      this.say( "Error loading image: " + fileName + extension + "." );
+      this.log( "Error loading image: " + fileName + extension + "." );
     }.bind( this ), false );
 
     image.src = "/graphics/" + type + "/" + fileName + extension;
@@ -307,10 +309,10 @@ Game.prototype.dataListener = function() {
         // this.players[model].message = data[model].message;
       } else if( !this.players[model] && data[model] ) { // Player connected.
         this.players[model] = new Player( model, data[model].x, data[model].y );
-        this.say( "Player " + model + " connected." );
+        this.log( "Player " + model + " connected." );
       } else if( this.players[model] && !data[model] ) { // Player disconnected.
         delete this.players[model];
-        this.say( "Player " + model + " disconnected." );
+        this.log( "Player " + model + " disconnected." );
       }
     }
   }.bind( this ) );
@@ -356,13 +358,23 @@ Game.prototype.postman = function( stop ) {
       data: {
         x: this.you.getX(),
         y: this.you.getY(),
-        model: this.you.model,
       },
     };
     this.ws.send( JSON.stringify( data ) );
   }.bind( this ), TIME_CLIENT_DATA_BROADCAST );
 
 }
+
+Game.prototype.say = function( message ) {
+  var data = {
+    event: 'msg',
+    data: {
+      message: message,
+    },
+  };
+
+  this.ws.send( JSON.stringify( data ) );
+};
 
 Game.prototype.render = function() {
 

@@ -8,60 +8,36 @@ block head
 
 block content
   script(type='text/javascript').
-    // For testing purpose.
-    var clientTest = {
-      connect: function(){
-        return {
-          on: function( event, done ) {
-            // var doneee = function(){};
-            console.log( "client watching and got:", event );
-            data = {
-              init: {
-                files: {
-                  players: [ "Remilia", "Remilia2", "Asuka", "FunkyPencil", "Milonar", "Wesker" ],
-                  backgrounds: [ "Grass" ],
-                  items: [ "Sticks" ]
-                },
-                player: {
-                  model: "Wesker",
-                  x: 512 / 2 - 32 / 2,
-                  y: 384 / 2 - 32 / 2 + 16,
-                  points: 0
-                }
-              },
-              data: {
-                Remilia: { x: 100, y: 100, message: "Remilia!" }
-              },
-              join: {
-                Wesker: { x: 200, y: 200 }
-              }
-            };
-            done( data[event] );
-          },
-          emit: function( event, data ) {
-            console.log( "client sent:", data );
-          },
-          fake: true
-        };
-      }
-    };
-    var io = io? io: clientTest;
-
     var uri = 'ws' + (document.location.protocol === 'https:'? 's': '')
       + '://' + document.location.host;// + '/' + document.location.pathname.substring(6);
 
     var game = new Game(uri);
 
+    var message;
+
     document.addEventListener( "DOMContentLoaded", function() {
 
       game.launch( "canvas", "status" );
+
+      message = document.getElementById("message");
+      message.addEventListener( "keyup", function( e ) {
+        if( e.keyCode === 13 ) {
+          // XXX game.say? should send the message through ws
+          game.say( e.target.value );
+          e.target.value = '';
+          e.target.blur();
+        }
+      }, false);
 
     }, false );
 
     // Player input: http://www.lostdecadegames.com/how-to-make-a-simple-html5-canvas-game/
     // var writing = false; // Chat coming soon.
     function keyChange( event ) {
-      var key = event.keyCode;// || event.which || window.event;
+      var key = event.keyCode;
+      if( key === 13 ) {
+        message.focus();
+      }
       if( key < 37 || key > 40 )
         return;
       var direction = key - 37;
@@ -80,12 +56,16 @@ block content
 
   h1 Collecting sticks 2
 
-  .text-center
-    canvas#canvas(width=512, height=384)
+  .mx-auto(style='width: ' + BOARD_WIDTH + 'px')
+    canvas#canvas(width=BOARD_WIDTH, height=BOARD_HEIGHT)
       p This browser doesn't support canvas tag. Visit this page in another browser.
 
     noscript
       p You won't play withought JS enabled
+
+    div.d-flex
+      input#message.flex-grow-1.form-control(type='text', autocomplete='off', maxlength=FORM_MESSAGE_LENGTH)
+      button.btn.btn-primary Send
 
   p.
     Simple collecting game. The sprites come from the internet.

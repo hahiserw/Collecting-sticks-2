@@ -31,8 +31,6 @@ var Player = function( model, startX, startY ) {
 
     if( typeof message !== "string" )
       return;
-    if( message === "" )
-      setTimeout( arguments.callee.bind( this ), 5000, "" );
     else
       this.message = message;
 

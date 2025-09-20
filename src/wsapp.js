@@ -150,6 +150,9 @@ var app = function(wss, eapp, server) {
     res.render('game', {
       title: 'Collecting sticks 2',
       data: data,
+      BOARD_WIDTH: c.BOARD_WIDTH,
+      BOARD_HEIGHT: c.BOARD_HEIGHT,
+      FORM_MESSAGE_LENGTH: c.FORM_MESSAGE_LENGTH,
     });
   });
 
@@ -264,11 +267,11 @@ var app = function(wss, eapp, server) {
     ws.on('message', function(message) {
       // console.log('ws message', message.toString());
 
+      if (!(id in gameData) || !(model in gameData[id].players))
+        return;
+
       var players = gameData[id].players;
       var sticks = gameData[id].sticks;
-
-      if (!(id in gameData) || !(model in players))
-        return;
 
       var player = players[model];
 
@@ -307,6 +310,10 @@ var app = function(wss, eapp, server) {
         }
 
         gameData[id].sticks = newSticks;
+        break;
+
+      case 'msg':
+        player.say(data.data.message);
         break;
       }
     });
