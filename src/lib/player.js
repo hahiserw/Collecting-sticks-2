@@ -7,6 +7,7 @@ var Player = function(model, x, y) {
   this.model = model;
   this.points = 0;
   this.message = '';
+  this.messageTimer = null;
 
   this.ws = null;
 };
