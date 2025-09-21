@@ -491,10 +491,11 @@ Game.prototype.drawPlayers = function() { // And chat messages.
 
 Game.prototype.drawPoints = function() {
 
-  // Sort by points... It will take ages to render.
-  // this.players.sort( function( a, b ) {
-  //   return b.getPoints() - a.getPoints();
-  // } );
+  // Sort by points.
+  var sortedModels = Object.keys( this.players );
+  sortedModels.sort( function( a, b ) {
+    return this.players[b].getPoints() - this.players[a].getPoints();
+  }.bind( this ) );
 
   var
     x = 0,
@@ -503,9 +504,8 @@ Game.prototype.drawPoints = function() {
     spaceY = PLAYER_HEIGHT / 2;
 
   // Icon of character or thumbnail followed by a number.
-  for( var model in this.players ) {
-
-    var player = this.players[model];
+  for( var i = 0; i < sortedModels.length; i++ ) {
+    var player = this.players[sortedModels[i]];
 
     if( !this.graphics["players"][player.model] ) {
       throw new Error( "Can't find player " + player.model + " graphic" );
