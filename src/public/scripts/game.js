@@ -449,9 +449,9 @@ Game.prototype.drawPlayers = function() { // And chat messages.
   //   return a.y - b.y;
   // } );
 
-  for( var id in this.players ) {
+  for( var model in this.players ) {
 
-    var player = this.players[id];
+    var player = this.players[model];
     var
       x = player.getX(),
       y = player.getY();
@@ -471,11 +471,16 @@ Game.prototype.drawPlayers = function() { // And chat messages.
       PLAYER_WIDTH, PLAYER_HEIGHT );
 
     if( player.message ) {
+      var messageWidth = ctx.measureText( player.message ).width;
       var recentFont = ctx.font;
+      ctx.textAlign = "center";
+      ctx.fillStyle = CANVAS_TEXT_BACKGROUND_COLOR;
+      ctx.fillRect( x + PLAYER_WIDTH / 2 - messageWidth / 2, y - 17, messageWidth, 14 );
+      ctx.fillStyle = CANVAS_TEXT_COLOR;
       ctx.font = "14px courier";
       ctx.fillText(
         player.message,
-        x + PLAYER_WIDTH / 2 - ctx.measureText( player.message ).width / 2,
+        x + PLAYER_WIDTH / 2,
         y - 5 );
       ctx.font = recentFont;
     }
@@ -498,9 +503,9 @@ Game.prototype.drawPoints = function() {
     spaceY = PLAYER_HEIGHT / 2;
 
   // Icon of character or thumbnail followed by a number.
-  for( var id in this.players ) {
+  for( var model in this.players ) {
 
-    var player = this.players[id];
+    var player = this.players[model];
 
     if( !this.graphics["players"][player.model] ) {
       throw new Error( "Can't find player " + player.model + " graphic" );
@@ -515,10 +520,13 @@ Game.prototype.drawPoints = function() {
       x + 10, y + 10,
       PLAYER_WIDTH / 2, PLAYER_HEIGHT / 2 );
 
-    // No style is set.
-    ctx.fillText( player.getPoints(), x + 40, y + 30/*, width*/ );
+    ctx.textAlign = "start";
+    ctx.fillStyle = CANVAS_TEXT_BACKGROUND_COLOR;
+    ctx.fillRect( x + 40, y + 13, 25, 20 );
+    ctx.fillStyle = CANVAS_TEXT_COLOR;
+    ctx.fillText( player.getPoints(), x + 40, y + 30, 25 );
 
-    // In case too many players plays.
+    // In case too many players play.
     if( y + 2 * spaceY > BOARD_HEIGHT - spaceY ) {
       x += spaceX;
       y = 0;

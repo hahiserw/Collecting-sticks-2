@@ -168,7 +168,10 @@ var app = function(wss, eapp, server) {
   eapp.get('/scripts/consts.js', function(req, res, next) {
     var consts = '';
     for (var v in c)
-      consts += 'const ' + v + ' = ' + c[v] + ';\n';
+      if (typeof c[v] === 'string')
+        consts += 'const ' + v + ' = "' + c[v].replace(/"/g, '\\"') + '";\n';
+      else
+        consts += 'const ' + v + ' = ' + c[v] + ';\n';
     res.type('js');
     res.send(consts);
   });
