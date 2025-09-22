@@ -442,16 +442,17 @@ Game.prototype.playerMove = function() {
 
 Game.prototype.drawPlayers = function() { // And chat messages.
 
-  // Draw players with greater y first.
+  // Draw players with smaller y first.
   // Sort array every frame? D:
-  // Or if one players is COL_HEIGHT odległości from another chceck whom y is greater and draw him first.
-  // this.players.sort( function( a, b ) {
-  //   return a.y - b.y;
-  // } );
+  // Or if one players is COL_HEIGHT odległości from another chceck whose y is
+  // greater and draw him first.
+  var sortedModels = Object.keys( this.players );
+  sortedModels.sort( function( a, b ) {
+    return this.players[a].getY()- this.players[b].getY();
+  }.bind( this ) );
 
-  for( var model in this.players ) {
-
-    var player = this.players[model];
+  for( var i = 0; i < sortedModels.length; i++ ) {
+    var player = this.players[sortedModels[i]];
     var
       x = player.getX(),
       y = player.getY();
