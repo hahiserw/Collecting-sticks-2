@@ -125,7 +125,7 @@ var Player = function( model, startX, startY ) {
         if( ++frame > 3 )
           frame = 0;
         nextFrame = true;
-      }, 140 );
+      }, TIME_PLAYER_ANIMATION_NEXT_FRAME );
     }
 
   }
