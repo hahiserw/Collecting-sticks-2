@@ -32,7 +32,7 @@ block content
 
     h1 Create a room
     label.form-label Name
-      input.form-control(name='name', type='text', maxlength=FORM_ROOM_NAME_LENGTH)
+      input.form-control(name='name', type='text', maxlength=c.FORM_ROOM_NAME_LENGTH)
     div
       div Background
       each background, i in files.backgrounds
@@ -45,7 +45,7 @@ block content
     div
       label.form-label Simultaneous sticks
         select.form-select(name='simultaneousSticks')
-          - for (var i = 1; i <= FORM_SIMULTANEOUS_STICKS_MAX; i++)
+          - for (var i = c.FORM_SIMULTANEOUS_STICKS_MIN; i <= c.FORM_SIMULTANEOUS_STICKS_MAX; i++)
             option(value=i, selected=i===2)= i
     button.btn.btn-primary(type='submit', name='submit', value='new') Create
 

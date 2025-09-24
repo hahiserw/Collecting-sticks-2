@@ -56,15 +56,15 @@ block content
 
   h1 Collecting sticks 2
 
-  .mx-auto(style='width: ' + BOARD_WIDTH + 'px')
-    canvas#canvas(width=BOARD_WIDTH, height=BOARD_HEIGHT)
+  .mx-auto(style='width: ' + c.BOARD_WIDTH + 'px')
+    canvas#canvas(width=c.BOARD_WIDTH, height=c.BOARD_HEIGHT)
       p This browser doesn't support canvas tag. Visit this page in another browser.
 
     noscript
       p You won't play withought JS enabled
 
     div.d-flex
-      input#message.flex-grow-1.form-control(type='text', autocomplete='off', maxlength=FORM_MESSAGE_LENGTH)
+      input#message.flex-grow-1.form-control(type='text', autocomplete='off', maxlength=c.FORM_MESSAGE_LENGTH)
       button.btn.btn-primary Send
 
   p.

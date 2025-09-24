@@ -67,11 +67,7 @@ var app = function(wss, eapp, server) {
       title: 'Collecting sticks 2',
       files: files,
       rooms: gameData,
-      FORM_ROOM_NAME_LENGTH: c.FORM_ROOM_NAME_LENGTH,
-      FORM_SIMULTANEOUS_STICKS_MIN: c.FORM_SIMULTANEOUS_STICKS_MIN,
-      FORM_SIMULTANEOUS_STICKS_MAX: c.FORM_SIMULTANEOUS_STICKS_MAX,
-      PLAYER_WIDTH: c.PLAYER_WIDTH,
-      PLAYER_HEIGHT: c.PLAYER_HEIGHT,
+      c: c,
     });
   });
 
@@ -140,19 +136,15 @@ var app = function(wss, eapp, server) {
 
   eapp.get('/game/:id', function(req, res, next) {
     const id = parseInt(req.params.id, 10);
-    const data = gameData[id];
 
-    if (!data) {
+    if (!(id in data)) {
       renderError(res, 404, 'No such room');
       return;
     }
 
     res.render('game', {
       title: 'Collecting sticks 2',
-      data: data,
-      BOARD_WIDTH: c.BOARD_WIDTH,
-      BOARD_HEIGHT: c.BOARD_HEIGHT,
-      FORM_MESSAGE_LENGTH: c.FORM_MESSAGE_LENGTH,
+      c: c,
     });
   });
 
