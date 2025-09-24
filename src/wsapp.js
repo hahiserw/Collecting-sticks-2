@@ -137,7 +137,7 @@ var app = function(wss, eapp, server) {
   eapp.get('/game/:id', function(req, res, next) {
     const id = parseInt(req.params.id, 10);
 
-    if (!(id in data)) {
+    if (!(id in gameData)) {
       renderError(res, 404, 'No such room');
       return;
     }
