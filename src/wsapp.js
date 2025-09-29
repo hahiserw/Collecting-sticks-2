@@ -291,7 +291,7 @@ var app = function(wss, eapp, server) {
           for (var i = 0; i < sticks.length; i++) {
             var stick = sticks[i];
 
-            if (innerPlayer.isCollidingWith(stick)) {
+            if (innerPlayer.isCollidingWith(stick, c.STICK_MARGIN_COLLECT)) {
               innerPlayer.points++;
               toDelete.push(i);
             }
@@ -389,7 +389,7 @@ var app = function(wss, eapp, server) {
             if (again)
               break;
             else
-              again = stick.isCollidingWith(player);
+              again = stick.isCollidingWith(player, c.STICK_MARGIN_PLACE);
           }
         } while(again);
 

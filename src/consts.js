@@ -19,6 +19,9 @@ var consts = {
   PLAYER_HEIGHT: 48,
   STICK_WIDTH: 32,
   STICK_HEIGHT: 32,
+
+  STICK_MARGIN_COLLECT: -10,
+  STICK_MARGIN_PLACE: 10,
 };
 
 module.exports = consts;
