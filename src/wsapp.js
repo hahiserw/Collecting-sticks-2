@@ -391,6 +391,15 @@ var app = function(wss, eapp, server) {
             else
               again = stick.isCollidingWith(player, c.STICK_MARGIN_PLACE);
           }
+
+          for (var i = 0; i < sticks.length; i++) {
+            var s = sticks[i];
+
+            if (again)
+              break;
+            else
+              again = stick.isCollidingWith(s, c.STICK_MARGIN_PLACE);
+          }
         } while(again);
 
         sticks.push(stick);
