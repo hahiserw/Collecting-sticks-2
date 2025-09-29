@@ -381,7 +381,7 @@ var app = function(wss, eapp, server) {
           again = false;
           x = Math.random() * (c.BOARD_WIDTH - c.STICK_WIDTH) | 0;
           y = Math.random() * (c.BOARD_HEIGHT - c.STICK_HEIGHT) | 0
-          stick = new Stick(Math.random() * 2 | 0, x, y);
+          newStick = new Stick(Math.random() * 2 | 0, x, y);
 
           for (var model in players) {
             var player = players[model];
@@ -389,20 +389,20 @@ var app = function(wss, eapp, server) {
             if (again)
               break;
             else
-              again = stick.isCollidingWith(player, c.STICK_MARGIN_PLACE);
+              again = newStick.isCollidingWith(player, c.STICK_MARGIN_PLACE);
           }
 
           for (var i = 0; i < sticks.length; i++) {
-            var s = sticks[i];
+            var stick = sticks[i];
 
             if (again)
               break;
             else
-              again = stick.isCollidingWith(s, c.STICK_MARGIN_PLACE);
+              again = newStick.isCollidingWith(stick, c.STICK_MARGIN_PLACE);
           }
         } while(again);
 
-        sticks.push(stick);
+        sticks.push(newStick);
       }
     }
   }, c.TIME_STICK_GENERATE);
