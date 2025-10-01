@@ -228,6 +228,13 @@ var app = function(wss, eapp, server) {
       return;
     }
 
+    // the player refreshed the page, the player object has been deleted by now
+    if (!(model in gameData[id].players)) {
+      ws.send(JSON.stringify({event: 'error', data: {error: 'Can\'t rejoin'}}));
+      ws.terminate();
+      return;
+    }
+
     gameData[id].players[model].setWs(ws);
 
     var data = {
