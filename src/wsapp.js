@@ -59,6 +59,10 @@ function renderError(res, status, message) {
   });
 }
 
+function sendData(ws, event, data) {
+  ws.send(JSON.stringify({event: event, data: data}));
+}
+
 var app = function(wss, eapp, server) {
   eapp.use(sessionParser);
 
@@ -217,20 +221,20 @@ var app = function(wss, eapp, server) {
     console.log('ws request', req.url, id);
 
     if (!(id in gameData)) {
-      ws.send(JSON.stringify({event: 'error', data: {error: 'No such game'}}));
+      sendData(ws, 'error', {error: 'No such game'});
       ws.terminate();
       return;
     }
 
     if (!model) {
-      ws.send(JSON.stringify({event: 'error', data: {error: 'No model'}}));
+      sendData(ws, 'error', {error: 'No model'});
       ws.terminate();
       return;
     }
 
     // the player refreshed the page, the player object has been deleted by now
     if (!(model in gameData[id].players)) {
-      ws.send(JSON.stringify({event: 'error', data: {error: 'Can\'t rejoin'}}));
+      sendData(ws, 'error', {error: 'Can\'t rejoin'});
       ws.terminate();
       return;
     }
@@ -238,33 +242,16 @@ var app = function(wss, eapp, server) {
     gameData[id].players[model].setWs(ws);
 
     var data = {
-      event: 'init',
-      data: {
-        files: files,
-        players: {},
-        background: gameData[id].background,
-        model: model,
+      files: files,
+      players: {
+        [model]: gameData[id].players[model].getData()
       },
+      background: gameData[id].background,
+      model: model,
     };
 
-    data.data.players[model] = gameData[id].players[model].getData();
-
     console.log(id, 'join', model);
-    ws.send(JSON.stringify(data));
-
-    // send join message to everybody
-    // wss.clients.forEach(function(client) {
-    //   if (client === ws || client.readyState !== ws.OPEN)
-    //     return;
-    //   console.log('join broadcast', model);
-
-    //   var joinData = {
-    //     event: 'join',
-    //     data: data.data,
-    //   };
-
-    //   ws.send(JSON.stringify(joinData));
-    // });
+    sendData(ws, 'init', data);
 
     ws.on('message', function(message) {
       // console.log('ws message', message.toString());
@@ -323,20 +310,6 @@ var app = function(wss, eapp, server) {
     ws.on('close', function() {
       console.log(id, 'leave', model);
 
-      // send leave message to everybody
-      // wss.clients.forEach(function(client) {
-      //   if (client === ws || client.readyState !== ws.OPEN)
-      //     return;
-      //   console.log('leave broadcast', model);
-
-      //   var leaveData = {
-      //     event: 'leave',
-      //     data: data.data,
-      //   };
-
-      //   ws.send(JSON.stringify(leaveData));
-      // });
-
       delete gameData[id].players[model];
 
       // delete the room if the last player left
@@ -368,10 +341,7 @@ var app = function(wss, eapp, server) {
         if (!ws)
           continue;
 
-        ws.send(JSON.stringify({
-          event: 'data',
-          data: data,
-        }));
+        sendData(ws, 'data', data);
       }
     }
   }, c.TIME_DATA_BROADCAST);
