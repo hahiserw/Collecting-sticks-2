@@ -30,18 +30,16 @@ var sessionParser = session({
   resave: false,
 });
 
-var usedModels = [];
-
-function getAnotherAvailableModel() {
+function getAnotherAvailableModel(id) {
   var choices = [];
   files.players.forEach(function(c) {
-    if (!(c in usedModels))
+    if (!(c in gameData[id].usedModels))
       choices.push(c);
   });
 
   if (choices.length) {
     var model = choices[choices.length * Math.random() | 0];
-    usedModels.push(model);
+    gameData[id].usedModels.push(model);
 
     return model;
   }
@@ -79,7 +77,7 @@ var app = function(wss, eapp, server) {
     var name = req.body.name || '';
     const background = req.body.background || files.backgrounds[0];
     const submit = req.body.submit || 'new';
-    const model = req.body.model || getAnotherAvailableModel();
+    var model = req.body.model;
     var simultaneousSticks = req.body.simultaneousSticks || 2;
 
     // clamp
@@ -110,11 +108,10 @@ var app = function(wss, eapp, server) {
       gameData[id] = {
         name: name,
         background: background,
-        players: {
-          [model]: player,
-        },
+        players: {},
         sticks: [],
         simultaneousSticks: simultaneousSticks,
+        usedModels: [],
       };
     } else {
       id = parseInt(submit, 10);
@@ -124,13 +121,21 @@ var app = function(wss, eapp, server) {
         return;
       }
 
-      if (!model || (model in gameData[id].players)) {
+      if (model in gameData[id].players) {
         renderError(res, 403, 'Player with the same model is already in the room');
         return;
       }
-
-      gameData[id].players[model] = player;
     }
+
+    if (!model)
+      model = getAnotherAvailableModel(id);
+
+    if (!model) {
+      renderError(res, 403, 'The room is full');
+      return;
+    }
+
+    gameData[id].players[model] = player;
 
     req.session.gameId = id;
     req.session.model = model;
