@@ -315,6 +315,9 @@ var app = function(wss, eapp, server) {
     ws.on('close', function() {
       console.log(id, 'leave', model);
 
+      if (!gameData[id])
+        return;
+
       delete gameData[id].players[model];
 
       // delete the room if the last player left
