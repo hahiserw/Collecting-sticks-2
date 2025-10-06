@@ -269,10 +269,10 @@ var app = function(wss, eapp, server) {
       if (!(id in gameData) || !(model in gameData[id].players))
         return;
 
-      var players = gameData[id].players;
-      var sticks = gameData[id].sticks;
+      const players = gameData[id].players;
+      const sticks = gameData[id].sticks;
 
-      var player = players[model];
+      const player = players[model];
 
       var data = {event: '', data: {}};
       try {
@@ -287,7 +287,7 @@ var app = function(wss, eapp, server) {
         player.y = data.data.y;
 
         // check if player is colliding with a stick and if so, add points and
-        // remove the stick
+        // delete the stick
         var toDelete = [];
         for (var innerModel in players) {
           var innerPlayer = players[innerModel];
