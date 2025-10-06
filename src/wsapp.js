@@ -157,6 +157,7 @@ var app = function(wss, eapp, server) {
     });
   });
 
+  // dynamic styles
   eapp.get('/stylesheets/style.css', function(req, res, next) {
     res.type('css');
     res.send('.thumbnail { width: ' + c.PLAYER_WIDTH + 'px; height: '
@@ -166,13 +167,16 @@ var app = function(wss, eapp, server) {
       + (c.PLAYER_HEIGHT) + 'px; }\n');
   });
 
+  // pass all consts to client
   eapp.get('/scripts/consts.js', function(req, res, next) {
     var consts = '';
+
     for (var v in c)
       if (typeof c[v] === 'string')
         consts += 'const ' + v + ' = "' + c[v].replace(/"/g, '\\"') + '";\n';
       else
         consts += 'const ' + v + ' = ' + c[v] + ';\n';
+
     res.type('js');
     res.send(consts);
   });
@@ -205,6 +209,7 @@ var app = function(wss, eapp, server) {
 
   function onError(error) { console.error(error) }
 
+  // pass session to websocket server
   server.on('upgrade', function(req, socket, head) {
     socket.on('error', onError);
 
@@ -297,6 +302,7 @@ var app = function(wss, eapp, server) {
           }
         }
 
+        // create a new array without deleted elements
         var newSticks = [];
         for (var i = 0; i < sticks.length; i++) {
           if (toDelete.indexOf(i) === -1)
@@ -356,20 +362,22 @@ var app = function(wss, eapp, server) {
 
   setInterval(function() {
     for (var id in gameData) {
-      var sticks = gameData[id].sticks;
-      var players = gameData[id].players;
+      const players = gameData[id].players;
+      const sticks = gameData[id].sticks;
 
+      // for every missing stick
       for (var i = 0; i < gameData[id].simultaneousSticks - sticks.length; i++) {
-        // generate position again if the stick is colliding with a player
+        // generate position again if the stick is colliding with a player or
+        // another stick
         var x, y, stick, again;
         do {
           again = false;
           x = Math.random() * (c.BOARD_WIDTH - c.STICK_WIDTH) | 0;
-          y = Math.random() * (c.BOARD_HEIGHT - c.STICK_HEIGHT) | 0
+          y = Math.random() * (c.BOARD_HEIGHT - c.STICK_HEIGHT) | 0;
           newStick = new Stick(Math.random() * 2 | 0, x, y);
 
           for (var model in players) {
-            var player = players[model];
+            const player = players[model];
 
             if (again)
               break;
@@ -378,7 +386,7 @@ var app = function(wss, eapp, server) {
           }
 
           for (var i = 0; i < sticks.length; i++) {
-            var stick = sticks[i];
+            const stick = sticks[i];
 
             if (again)
               break;
