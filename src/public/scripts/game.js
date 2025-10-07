@@ -332,8 +332,8 @@ Game.prototype.setCanvas = function() {
 
   canvas.addEventListener( "click", function( event ) {
     var
-      x = event.pageX - event.target.offsetLeft,
-      y = event.pageY - event.target.offsetTop;
+      x = event.pageX - event.target.offsetLeft - PLAYER_WIDTH / 2,
+      y = event.pageY - event.target.offsetTop - PLAYER_HEIGHT / 2;
     this.you.goTo( x, y );
   }.bind( this ), false );
 
