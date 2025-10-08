@@ -13,12 +13,10 @@ game
 // ( function() {
 
 
-var log, canvas, ctx; // OMG
-
 var Game = function(uri) {
   this.uri = uri;
 
-  this.you = undefined;
+  this.you = null;
 
   this.players = {};
 
@@ -34,6 +32,8 @@ var Game = function(uri) {
     backgrounds: {},
     sticks: [],
   };
+
+  this.updating = null;
 
 };
 
@@ -51,7 +51,7 @@ Game.prototype.log = function( text ) {
     ( s < 10? "0" + s: s ) + ":" +
     ( ss < 100? "0" + ( ss < 10? "0" + ss: ss ): ss );
 
-  log.innerHTML = time + ": " + text + "\n" + log.innerHTML;
+  logElement.innerHTML = time + ": " + text + "\n" + logElement.innerHTML;
 
 }
 
@@ -78,7 +78,7 @@ Game.prototype.launch = function( canvasId, statusId ) {
 
 Game.prototype.init = function( canvasId, statusId, done ) {
 
-  log = document.getElementById( statusId );
+  logElement = document.getElementById( statusId );
 
   // TODO rewrite to use promises
   this.log( "Initializing Game..." );
@@ -96,7 +96,7 @@ Game.prototype.init = function( canvasId, statusId, done ) {
       this.setCanvas();
       this.log( "Environment prepared." );
       this.log( "Starting update function." );
-      this.postman();
+      this.postman( true );
       this.log( "Launching Game." );
       done.call( this );
     }.bind( this ) );
@@ -117,13 +117,13 @@ Game.prototype.init = function( canvasId, statusId, done ) {
 
 Game.prototype.initCanvas = function( id ) {
 
-  canvas = document.getElementById( id );
-  ctx = canvas.getContext( "2d" );
+  this.canvas = document.getElementById( id );
+  this.ctx = this.canvas.getContext( "2d" );
 
-  if( !canvas )
+  if( !this.canvas )
     this.log( "Lol, canvas problem? What noob did let it happen?" );
 
-  if( !ctx )
+  if( !this.ctx )
     this.log( "Cannot create canvas context. Try another browser." );
 
 }
@@ -325,12 +325,12 @@ Game.prototype.dataListener = function() {
 
 Game.prototype.setCanvas = function() {
 
-  canvas.width = BOARD_WIDTH;
-  canvas.height = BOARD_HEIGHT;
+  this.canvas.width = BOARD_WIDTH;
+  this.canvas.height = BOARD_HEIGHT;
 
-  ctx.font = "20px monospace";
+  this.ctx.font = "20px monospace";
 
-  canvas.addEventListener( "click", function( event ) {
+  this.canvas.addEventListener( "click", function( event ) {
     var
       x = event.pageX - event.target.offsetLeft - PLAYER_WIDTH / 2,
       y = event.pageY - event.target.offsetTop - PLAYER_HEIGHT / 2;
@@ -339,20 +339,14 @@ Game.prototype.setCanvas = function() {
 
 }
 
-Game.prototype.postman = function( stop ) {
+Game.prototype.postman = function( start ) {
 
-  // Just for testing.
-  if( this.ws.fake )
-    return;
-
-  var updating;
-
-  if( stop ) {
-    clearTimeout( updating );
+  if( !start ) {
+    clearInterval( this.updating );
     return;
   }
 
-  updating = setInterval( function() {
+  this.updating = setInterval( function() {
     var data = {
       event: 'pos',
       data: {
@@ -360,6 +354,7 @@ Game.prototype.postman = function( stop ) {
         y: this.you.getY(),
       },
     };
+
     this.ws.send( JSON.stringify( data ) );
   }.bind( this ), TIME_CLIENT_DATA_BROADCAST );
 
@@ -378,7 +373,7 @@ Game.prototype.say = function( message ) {
 
 Game.prototype.render = function() {
 
-  ctx.drawImage( this.graphics["backgrounds"][this.graphics.set.background], 0, 0 );
+  this.ctx.drawImage( this.graphics["backgrounds"][this.graphics.set.background], 0, 0 );
 
   this.drawSticks();
 
@@ -403,7 +398,7 @@ Game.prototype.drawSticks = function() {
       return;
     }
 
-    ctx.drawImage(
+    this.ctx.drawImage(
       this.graphics["sticks"]["Sticks"],
       stick.model * STICK_WIDTH, 0,
       STICK_WIDTH, STICK_HEIGHT,
@@ -464,7 +459,7 @@ Game.prototype.drawPlayers = function() { // And chat messages.
       continue;
     }
 
-    ctx.drawImage(
+    this.ctx.drawImage(
       this.graphics["players"][player.model],
       player.getFrame() * PLAYER_WIDTH, player.getDirection() * PLAYER_HEIGHT,
       PLAYER_WIDTH, PLAYER_HEIGHT,
@@ -472,18 +467,18 @@ Game.prototype.drawPlayers = function() { // And chat messages.
       PLAYER_WIDTH, PLAYER_HEIGHT );
 
     if( player.message ) {
-      var messageWidth = ctx.measureText( player.message ).width;
-      var recentFont = ctx.font;
-      ctx.textAlign = "center";
-      ctx.fillStyle = CANVAS_TEXT_BACKGROUND_COLOR;
-      ctx.fillRect( x + PLAYER_WIDTH / 2 - messageWidth / 2, y - 17, messageWidth, 14 );
-      ctx.fillStyle = CANVAS_TEXT_COLOR;
-      ctx.font = "14px courier";
-      ctx.fillText(
+      var messageWidth = this.ctx.measureText( player.message ).width;
+      var recentFont = this.ctx.font;
+      this.ctx.textAlign = "center";
+      this.ctx.fillStyle = CANVAS_TEXT_BACKGROUND_COLOR;
+      this.ctx.fillRect( x + PLAYER_WIDTH / 2 - messageWidth / 2, y - 17, messageWidth, 14 );
+      this.ctx.fillStyle = CANVAS_TEXT_COLOR;
+      this.ctx.font = "14px courier";
+      this.ctx.fillText(
         player.message,
         x + PLAYER_WIDTH / 2,
         y - 5 );
-      ctx.font = recentFont;
+      this.ctx.font = recentFont;
     }
 
   }
@@ -514,18 +509,18 @@ Game.prototype.drawPoints = function() {
     }
 
     // Awesome thumbnail. :D
-    ctx.drawImage(
+    this.ctx.drawImage(
       this.graphics["players"][player.model],
       player.getFrame() * PLAYER_WIDTH, player.getDirection() * PLAYER_HEIGHT,
       PLAYER_WIDTH, PLAYER_HEIGHT,
       x + 10, y + 10,
       PLAYER_WIDTH / 2, PLAYER_HEIGHT / 2 );
 
-    ctx.textAlign = "start";
-    ctx.fillStyle = CANVAS_TEXT_BACKGROUND_COLOR;
-    ctx.fillRect( x + 40, y + 13, 25, 20 );
-    ctx.fillStyle = CANVAS_TEXT_COLOR;
-    ctx.fillText( player.getPoints(), x + 40, y + 30, 25 );
+    this.ctx.textAlign = "start";
+    this.ctx.fillStyle = CANVAS_TEXT_BACKGROUND_COLOR;
+    this.ctx.fillRect( x + 40, y + 13, 25, 20 );
+    this.ctx.fillStyle = CANVAS_TEXT_COLOR;
+    this.ctx.fillText( player.getPoints(), x + 40, y + 30, 25 );
 
     // In case too many players play.
     if( y + 2 * spaceY > BOARD_HEIGHT - spaceY ) {
