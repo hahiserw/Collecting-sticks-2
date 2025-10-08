@@ -197,8 +197,8 @@ Game.prototype.connect = function( gotInit, gotError ) {
     this.players[player.model] = this.you;
 
     // First one.
-    this.graphics.set["background"] = data.background;
-    this.graphics.set["sticks"] = data.files.sticks[0];
+    this.graphics.set.background = data.background;
+    this.graphics.set.sticks = data.files.sticks[0];
 
     gotInit.call( this );
   }
@@ -373,11 +373,11 @@ Game.prototype.say = function( message ) {
 
 Game.prototype.render = function() {
 
-  this.ctx.drawImage( this.graphics["backgrounds"][this.graphics.set.background], 0, 0 );
+  this.playerMove();
+
+  this.ctx.drawImage( this.graphics.backgrounds[this.graphics.set.background], 0, 0 );
 
   this.drawSticks();
-
-  this.playerMove();
 
   this.drawPlayers();
 
@@ -393,13 +393,13 @@ Game.prototype.drawSticks = function() {
       x = stick.x,
       y = stick.y;
 
-    if( !this.graphics["sticks"]["Sticks"] ) {
+    if( !this.graphics.sticks[this.graphics.set.sticks] ) {
       throw new Error( "Can't find stick graphic" );
       return;
     }
 
     this.ctx.drawImage(
-      this.graphics["sticks"]["Sticks"],
+      this.graphics.sticks[this.graphics.set.sticks],
       stick.model * STICK_WIDTH, 0,
       STICK_WIDTH, STICK_HEIGHT,
       x, y,
@@ -443,7 +443,7 @@ Game.prototype.drawPlayers = function() { // And chat messages.
   // greater and draw him first.
   var sortedModels = Object.keys( this.players );
   sortedModels.sort( function( a, b ) {
-    return this.players[a].getY()- this.players[b].getY();
+    return this.players[a].getY() - this.players[b].getY();
   }.bind( this ) );
 
   for( var i = 0; i < sortedModels.length; i++ ) {
@@ -454,13 +454,13 @@ Game.prototype.drawPlayers = function() { // And chat messages.
 
     player.tick();
 
-    if( !this.graphics["players"][player.model] ) {
+    if( !this.graphics.players[player.model] ) {
       throw new Error( "Can't find player " + player.model + " graphic" );
       continue;
     }
 
     this.ctx.drawImage(
-      this.graphics["players"][player.model],
+      this.graphics.players[player.model],
       player.getFrame() * PLAYER_WIDTH, player.getDirection() * PLAYER_HEIGHT,
       PLAYER_WIDTH, PLAYER_HEIGHT,
       x, y,
@@ -503,14 +503,14 @@ Game.prototype.drawPoints = function() {
   for( var i = 0; i < sortedModels.length; i++ ) {
     var player = this.players[sortedModels[i]];
 
-    if( !this.graphics["players"][player.model] ) {
+    if( !this.graphics.players[player.model] ) {
       throw new Error( "Can't find player " + player.model + " graphic" );
       continue;
     }
 
     // Awesome thumbnail. :D
     this.ctx.drawImage(
-      this.graphics["players"][player.model],
+      this.graphics.players[player.model],
       player.getFrame() * PLAYER_WIDTH, player.getDirection() * PLAYER_HEIGHT,
       PLAYER_WIDTH, PLAYER_HEIGHT,
       x + 10, y + 10,
