@@ -42,6 +42,7 @@ block content
         return;
       var direction = key - 37;
       game.keys[direction] = ( event.type === "keydown" );
+      game.you.stopAutopilot();
       event.preventDefault();
     }
 

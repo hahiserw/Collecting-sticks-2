@@ -139,4 +139,10 @@ var Player = function( model, startX, startY ) {
 
   }
 
+  this.stopAutopilot = function() {
+
+    autopilot = false;
+
+  }
+
 }
