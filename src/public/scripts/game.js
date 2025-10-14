@@ -35,6 +35,10 @@ var Game = function(uri) {
 
   this.updating = null;
 
+  this.logElement = null;
+  this.canvas = null;
+  this.ctx = null;
+
 };
 
 Game.prototype.log = function( text ) {
@@ -51,7 +55,7 @@ Game.prototype.log = function( text ) {
     ( s < 10? "0" + s: s ) + ":" +
     ( ss < 100? "0" + ( ss < 10? "0" + ss: ss ): ss );
 
-  logElement.innerHTML = time + ": " + text + "\n" + logElement.innerHTML;
+  this.logElement.innerHTML = time + ": " + text + "\n" + this.logElement.innerHTML;
 
 }
 
@@ -78,7 +82,7 @@ Game.prototype.launch = function( canvasId, statusId ) {
 
 Game.prototype.init = function( canvasId, statusId, done ) {
 
-  logElement = document.getElementById( statusId );
+  this.logElement = document.getElementById( statusId );
 
   // TODO rewrite to use promises
   this.log( "Initializing Game..." );
