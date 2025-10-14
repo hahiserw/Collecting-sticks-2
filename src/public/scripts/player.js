@@ -7,7 +7,6 @@ var Player = function( model, startX, startY ) {
     moveX,
     moving = false,
     autopilot = false,
-    distance = -1,
     direction = 0,
     frame = 0,
     nextFrame = true,
@@ -56,7 +55,6 @@ var Player = function( model, startX, startY ) {
       direction = 0;
 
     if( x || y ) {
-      distance++;
       moving = true;
     } else { // Isn't it bad?
       frame = 0;
