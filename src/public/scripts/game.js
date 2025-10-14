@@ -194,7 +194,7 @@ Game.prototype.connect = function( gotInit, gotError ) {
     this.you = new Player( model, player.x, player.y );
 
     // this.players.push( this.you );
-    this.players[player.model] = this.you;
+    this.players[model] = this.you;
 
     // First one.
     this.graphics.set.background = data.background;
