@@ -20,9 +20,13 @@ var consts = {
   STICK_WIDTH: 32,
   STICK_HEIGHT: 32,
 
+  // margin of collision between a player and a stick to get it
   STICK_MARGIN_COLLECT: -10,
+  // margin between placing 2 sticks (or between a player and a stick)
   STICK_MARGIN_PLACE: 10,
 
+  // allowed distance difference between 2 position updates
+  // don't update player's position if they move more than this many pixels
   PLAYER_MOVE_STEP: 0,
 };
 
