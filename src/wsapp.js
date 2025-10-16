@@ -281,10 +281,9 @@ var app = function(wss, eapp, server) {
 
       switch (data.event) {
       case 'pos':
-        // XXX server should check if position changes only slightly
+        // check if player's position changes only slightly and move them
         // no teleportation allowed :)
-        player.x = data.data.x;
-        player.y = data.data.y;
+        player.moveTo(data.data.x, data.data.y);
 
         // check if player is colliding with a stick and if so, add points and
         // delete the stick

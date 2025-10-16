@@ -40,6 +40,21 @@ Player.prototype.say = function(message) {
   }.bind(this), c.TIME_MESSAGE_TIMEOUT);
 };
 
+Player.prototype.moveTo = function(x, y, teleport) {
+  if (!teleport) {
+    if (Math.abs(this.x - x) > c.PLAYER_MOVE_STEP
+      || Math.abs(this.y - y) > c.PLAYER_MOVE_STEP)
+      return;
+  }
+
+  this.x = x;
+  this.y = y;
+};
+
+Player.prototype.teleport = function(x, y) {
+  this.moveTo(x, y, true);
+};
+
 Object.setPrototypeOf(Player.prototype, Entity.prototype);
 
 module.exports = Player;

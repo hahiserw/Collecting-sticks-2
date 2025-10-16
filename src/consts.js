@@ -22,6 +22,10 @@ var consts = {
 
   STICK_MARGIN_COLLECT: -10,
   STICK_MARGIN_PLACE: 10,
+
+  PLAYER_MOVE_STEP: 0,
 };
+
+consts.PLAYER_MOVE_STEP = consts.TIME_CLIENT_DATA_BROADCAST / 10; // px/s
 
 module.exports = consts;
