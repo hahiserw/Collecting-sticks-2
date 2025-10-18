@@ -2,14 +2,21 @@ var consts = {
   FORM_ROOM_NAME_LENGTH: 50,
   FORM_SIMULTANEOUS_STICKS_MIN: 1,
   FORM_SIMULTANEOUS_STICKS_MAX: 10,
+  // player chat
   FORM_MESSAGE_LENGTH: 50,
 
+  // how often server should send broadcasts
   TIME_DATA_BROADCAST: 100,
+  // how often client should send data
   TIME_CLIENT_DATA_BROADCAST: 100,
+  // how often a new stick should be placed if there are none
   TIME_STICK_GENERATE: 1000,
+  // how long should be a chat message displayed
   TIME_MESSAGE_TIMEOUT: 4000,
+  // when to change the player's frame at client side
   TIME_PLAYER_ANIMATION_NEXT_FRAME: 140,
 
+  // color of point counters and players' messages
   CANVAS_TEXT_COLOR: 'rgba(0, 0, 0, 0.8)',
   CANVAS_TEXT_BACKGROUND_COLOR: 'rgba(255, 255, 255, 0.8)',
 
@@ -26,10 +33,11 @@ var consts = {
   STICK_MARGIN_PLACE: 10,
 
   // allowed distance difference between 2 position updates
-  // don't update player's position if they move more than this many pixels
+  // don't update player's position if they move more than this many pixels per
+  // request
   PLAYER_MOVE_STEP: 0,
 };
 
-consts.PLAYER_MOVE_STEP = consts.TIME_CLIENT_DATA_BROADCAST / 10; // px/s
+consts.PLAYER_MOVE_STEP = consts.TIME_CLIENT_DATA_BROADCAST / 10; // px/request
 
 module.exports = consts;
