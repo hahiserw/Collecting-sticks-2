@@ -14,12 +14,15 @@ block content
     var game = new Game(uri);
 
     var message;
+    var send;
 
     document.addEventListener( "DOMContentLoaded", function() {
 
       game.launch( "canvas", "status" );
 
       message = document.getElementById("message");
+      send = document.getElementById("send");
+
       message.addEventListener( "keyup", function( e ) {
         if( e.keyCode === 13 ) {
           // XXX game.say? should send the message through ws
@@ -28,6 +31,11 @@ block content
           e.target.blur();
         }
       }, false);
+
+      send.onclick = function() {
+        game.say( message.value );
+        message.value = '';
+      };
 
     }, false );
 
@@ -62,13 +70,13 @@ block content
       p This browser doesn't support canvas tag. Visit this page in another browser.
 
     noscript
-      p You won't play withought JS enabled
+      p You won't play without JS enabled
 
     div.d-flex
       input#message.flex-grow-1.form-control(type='text', autocomplete='off', maxlength=c.FORM_MESSAGE_LENGTH)
-      button.btn.btn-primary Send
+      button#send.btn.btn-primary Send
 
   p.
-    Simple collecting game. The sprites come from the internet.
+    Control your character with the arrow keys or click on the canvas. Press enter or click on the input below the canvas to chat.
 
   pre#status.overflow-auto.border.border-black.px-1 Page loaded.
