@@ -1,5 +1,6 @@
 var c = require('../consts');
 
+var u = require('./utils');
 var Player = require('./player');
 var Stick = require('./stick');
 
@@ -13,6 +14,14 @@ var Game = function(name, background, simultaneousSticks, roundTime, roundSticks
   this.roundTime = roundTime;
   this.roundSticks = roundSticks;
   this.usedModels = [];
+
+  this.broadcastInterval = setInterval(function() {
+    this.broadcastPlayersData();
+  }.bind(this), c.TIME_DATA_BROADCAST);
+
+  this.generateInterval = setInterval(function() {
+    this.generateSticks();
+  }.bind(this), c.TIME_STICK_GENERATE);
 };
 
 Game.prototype.addPlayer = function(model) {
@@ -79,7 +88,8 @@ Game.prototype.updateSticks = function() {
   this.sticks = newSticks;
 };
 
-Game.prototype.broadcastPlayersData = function(sendData) {
+// send room data to every player in the room
+Game.prototype.broadcastPlayersData = function() {
   var data = {players: {}, sticks: []};
 
   for (var model in this.players) {
@@ -96,7 +106,7 @@ Game.prototype.broadcastPlayersData = function(sendData) {
     if (!ws)
       continue;
 
-    sendData(ws, 'data', data);
+    u.sendData(ws, 'data', data);
   }
 };
 
@@ -133,6 +143,12 @@ Game.prototype.generateSticks = function() {
 
     this.sticks.push(newStick);
   }
+};
+
+// destructor
+Game.prototype.end = function() {
+  clearInterval(this.broadcastInterval);
+  clearInterval(this.generateInterval);
 };
 
 module.exports = Game;

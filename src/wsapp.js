@@ -4,6 +4,7 @@ var fs = require('fs');
 var ws = require('ws');
 var session = require('express-session');
 var createError = require('http-errors');
+var u = require('./lib/utils');
 var Game = require('./lib/game');
 
 var gameData = {};
@@ -37,10 +38,6 @@ function renderError(res, status, message) {
       stack: 'Something went wrong',
     },
   });
-}
-
-function sendData(ws, event, data) {
-  ws.send(JSON.stringify({event: event, data: data}));
 }
 
 var app = function(wss, eapp, server) {
@@ -211,20 +208,20 @@ var app = function(wss, eapp, server) {
     console.log('ws request', req.url, id);
 
     if (!(id in gameData)) {
-      sendData(ws, 'error', {error: 'No such game'});
+      u.sendData(ws, 'error', {error: 'No such game'});
       ws.terminate();
       return;
     }
 
     if (!model) {
-      sendData(ws, 'error', {error: 'No model'});
+      u.sendData(ws, 'error', {error: 'No model'});
       ws.terminate();
       return;
     }
 
     // the player refreshed the page, the player object has been deleted by now
     if (!gameData[id].isModelInPlayers(model)) {
-      sendData(ws, 'error', {error: 'Can\'t rejoin'});
+      u.sendData(ws, 'error', {error: 'Can\'t rejoin'});
       ws.terminate();
       return;
     }
@@ -241,7 +238,7 @@ var app = function(wss, eapp, server) {
     };
 
     console.log(id, 'join', model);
-    sendData(ws, 'init', data);
+    u.sendData(ws, 'init', data);
 
     ws.on('message', function(message) {
       // console.log('ws message', message.toString());
@@ -274,30 +271,20 @@ var app = function(wss, eapp, server) {
     ws.on('close', function() {
       console.log(id, 'leave', model);
 
-      if (!gameData[id])
+      var game = gameData[id];
+
+      if (!game)
         return;
 
-      gameData[id].deletePlayer(model);
+      game.deletePlayer(model);
 
       // delete the room if the last player left
-      if (Object.keys(gameData[id].players).length === 0) {
+      if (Object.keys(game.players).length === 0) {
+        game.end();
         delete gameData[id];
       }
     });
   });
-
-  setInterval(function() {
-    // send room data to every player in the room
-    for (var id in gameData) {
-      gameData[id].broadcastPlayersData(sendData);
-    }
-  }, c.TIME_DATA_BROADCAST);
-
-  setInterval(function() {
-    for (var id in gameData) {
-      gameData[id].generateSticks();
-    }
-  }, c.TIME_STICK_GENERATE);
-}
+};
 
 module.exports = app;
