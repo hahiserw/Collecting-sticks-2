@@ -46,7 +46,13 @@ block content
       label.form-label Simultaneous sticks
         select.form-select(name='simultaneousSticks')
           - for (var i = c.FORM_SIMULTANEOUS_STICKS_MIN; i <= c.FORM_SIMULTANEOUS_STICKS_MAX; i++)
-            option(value=i, selected=i===2)= i
+            option(value=i, selected=i===c.FORM_SIMULTANEOUS_STICKS_DEFAULT)= i
+    div
+      label.form-label Round time (in minutes)
+        input.form-control(name='time', type='number', min=c.FORM_TIME_MIN, max=c.FORM_TIME_MAX, value=c.FORM_TIME_DEFAULT)
+    div
+      label.form-label Sticks to collect
+        input.form-control(name='sticks', type='number', min=c.FORM_STICKS_MIN, max=c.FORM_STICKS_MAX, value=c.FORM_STICKS_DEFAULT)
     button.btn.btn-primary(type='submit', name='submit', value='new') Create
 
   .my-5

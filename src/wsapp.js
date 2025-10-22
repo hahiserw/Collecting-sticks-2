@@ -78,12 +78,23 @@ var app = function(wss, eapp, server) {
     const background = req.body.background || files.backgrounds[0];
     const submit = req.body.submit || 'new';
     var model = req.body.model;
-    var simultaneousSticks = req.body.simultaneousSticks || 2;
+    var simultaneousSticks = parseInt(req.body.simultaneousSticks, 10)
+      || c.FORM_SIMULTANEOUS_STICKS_DEFAULT;
+    var time = parseInt(req.body.time, 10) || c.FORM_TIME_DEFAULT;
+    var sticks = parseInt(req.body.sticks, 10) || c.FORM_STICKS_DEFAULT;
 
     // clamp
     simultaneousSticks = Math.min(
       Math.max(simultaneousSticks, c.FORM_SIMULTANEOUS_STICKS_MIN),
       c.FORM_SIMULTANEOUS_STICKS_MAX
+    );
+    time = Math.min(
+      Math.max(time, c.FORM_TIME_MIN),
+      c.FORM_TIME_MAX
+    );
+    sticks = Math.min(
+      Math.max(sticks, c.FORM_STICKS_MIN),
+      c.FORM_STICKS_MAX
     );
 
     // validate?
@@ -111,6 +122,8 @@ var app = function(wss, eapp, server) {
         players: {},
         sticks: [],
         simultaneousSticks: simultaneousSticks,
+        time: time,
+        sticks: sticks,
         usedModels: [],
       };
     } else {
