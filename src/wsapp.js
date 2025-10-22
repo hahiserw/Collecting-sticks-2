@@ -4,8 +4,7 @@ var fs = require('fs');
 var ws = require('ws');
 var session = require('express-session');
 var createError = require('http-errors');
-var Player = require('./lib/player');
-var Stick = require('./lib/stick');
+var Game = require('./lib/game');
 
 var gameData = {};
 
@@ -29,23 +28,6 @@ var sessionParser = session({
   secret: 'shhh',
   resave: false,
 });
-
-function getAnotherAvailableModel(id) {
-  var choices = [];
-  files.players.forEach(function(c) {
-    if (!(c in gameData[id].usedModels))
-      choices.push(c);
-  });
-
-  if (choices.length) {
-    var model = choices[choices.length * Math.random() | 0];
-    gameData[id].usedModels.push(model);
-
-    return model;
-  }
-
-  return null;
-}
 
 function renderError(res, status, message) {
   res.status(status).render('error', {
@@ -80,31 +62,25 @@ var app = function(wss, eapp, server) {
     var model = req.body.model;
     var simultaneousSticks = parseInt(req.body.simultaneousSticks, 10)
       || c.FORM_SIMULTANEOUS_STICKS_DEFAULT;
-    var time = parseInt(req.body.time, 10) || c.FORM_TIME_DEFAULT;
-    var sticks = parseInt(req.body.sticks, 10) || c.FORM_STICKS_DEFAULT;
+    var roundTime = parseInt(req.body.time, 10) || c.FORM_TIME_DEFAULT;
+    var roundSticks = parseInt(req.body.sticks, 10) || c.FORM_STICKS_DEFAULT;
 
     // clamp
     simultaneousSticks = Math.min(
       Math.max(simultaneousSticks, c.FORM_SIMULTANEOUS_STICKS_MIN),
       c.FORM_SIMULTANEOUS_STICKS_MAX
     );
-    time = Math.min(
-      Math.max(time, c.FORM_TIME_MIN),
+    roundTime = Math.min(
+      Math.max(roundTime, c.FORM_TIME_MIN),
       c.FORM_TIME_MAX
     );
-    sticks = Math.min(
-      Math.max(sticks, c.FORM_STICKS_MIN),
+    roundSticks = Math.min(
+      Math.max(roundSticks, c.FORM_STICKS_MIN),
       c.FORM_STICKS_MAX
     );
 
     // validate?
     name = name.substring(0, c.FORM_ROOM_NAME_LENGTH).trim();
-
-    const player = new Player(
-      model,
-      (c.BOARD_WIDTH - c.PLAYER_WIDTH) * Math.random() | 0,
-      (c.BOARD_HEIGHT - c.PLAYER_HEIGHT) * Math.random() | 0,
-    );
 
     var id = 0;
 
@@ -116,16 +92,7 @@ var app = function(wss, eapp, server) {
 
       id = Object.keys(gameData).length;
 
-      gameData[id] = {
-        name: name,
-        background: background,
-        players: {},
-        sticks: [],
-        simultaneousSticks: simultaneousSticks,
-        time: time,
-        sticks: sticks,
-        usedModels: [],
-      };
+      gameData[id] = new Game(name, background, simultaneousSticks, roundTime, roundSticks);
     } else {
       id = parseInt(submit, 10);
 
@@ -134,21 +101,21 @@ var app = function(wss, eapp, server) {
         return;
       }
 
-      if (model in gameData[id].players) {
+      if (gameData[id].isModelInPlayers(model)) {
         renderError(res, 403, 'Player with the same model is already in the room');
         return;
       }
     }
 
     if (!model)
-      model = getAnotherAvailableModel(id);
+      model = gameData[id].getAnotherAvailableModel(files.players);
 
     if (!model) {
       renderError(res, 403, 'The room is full');
       return;
     }
 
-    gameData[id].players[model] = player;
+    gameData[id].addPlayer(model);
 
     req.session.gameId = id;
     req.session.model = model;
@@ -256,18 +223,18 @@ var app = function(wss, eapp, server) {
     }
 
     // the player refreshed the page, the player object has been deleted by now
-    if (!(model in gameData[id].players)) {
+    if (!gameData[id].isModelInPlayers(model)) {
       sendData(ws, 'error', {error: 'Can\'t rejoin'});
       ws.terminate();
       return;
     }
 
-    gameData[id].players[model].setWs(ws);
+    gameData[id].getPlayer(model).setWs(ws);
 
     var data = {
       files: files,
       players: {
-        [model]: gameData[id].players[model].getData()
+        [model]: gameData[id].getPlayer(model).getData()
       },
       background: gameData[id].background,
       model: model,
@@ -279,13 +246,11 @@ var app = function(wss, eapp, server) {
     ws.on('message', function(message) {
       // console.log('ws message', message.toString());
 
-      if (!(id in gameData) || !(model in gameData[id].players))
+      if (!(id in gameData) || !gameData[id].isModelInPlayers(model))
         return;
 
-      const players = gameData[id].players;
-      const sticks = gameData[id].sticks;
-
-      const player = players[model];
+      const game = gameData[id];
+      const player = game.getPlayer(model);
 
       var data = {event: '', data: {}};
       try {
@@ -297,31 +262,7 @@ var app = function(wss, eapp, server) {
         // check if player's position changes only slightly and move them
         // no teleportation allowed :)
         player.moveTo(data.data.x, data.data.y);
-
-        // check if player is colliding with a stick and if so, add points and
-        // delete the stick
-        var toDelete = [];
-        for (var innerModel in players) {
-          var innerPlayer = players[innerModel];
-
-          for (var i = 0; i < sticks.length; i++) {
-            var stick = sticks[i];
-
-            if (innerPlayer.isCollidingWith(stick, c.STICK_MARGIN_COLLECT)) {
-              innerPlayer.points++;
-              toDelete.push(i);
-            }
-          }
-        }
-
-        // create a new array without deleted elements
-        var newSticks = [];
-        for (var i = 0; i < sticks.length; i++) {
-          if (toDelete.indexOf(i) === -1)
-            newSticks.push(sticks[i]);
-        }
-
-        gameData[id].sticks = newSticks;
+        game.updateSticks();
         break;
 
       case 'msg':
@@ -336,7 +277,7 @@ var app = function(wss, eapp, server) {
       if (!gameData[id])
         return;
 
-      delete gameData[id].players[model];
+      gameData[id].deletePlayer(model);
 
       // delete the room if the last player left
       if (Object.keys(gameData[id].players).length === 0) {
@@ -348,67 +289,13 @@ var app = function(wss, eapp, server) {
   setInterval(function() {
     // send room data to every player in the room
     for (var id in gameData) {
-      const players = gameData[id].players;
-      const sticks = gameData[id].sticks;
-
-      var data = {players: {}, sticks: []};
-
-      for (var model in players) {
-        data.players[model] = players[model].getData();
-      }
-
-      for (var i = 0; i < sticks.length; i++) {
-        data.sticks[i] = sticks[i].getData();
-      }
-
-      for (var model in players) {
-        const ws = players[model].getWs();
-
-        if (!ws)
-          continue;
-
-        sendData(ws, 'data', data);
-      }
+      gameData[id].broadcastPlayersData(sendData);
     }
   }, c.TIME_DATA_BROADCAST);
 
   setInterval(function() {
     for (var id in gameData) {
-      const players = gameData[id].players;
-      const sticks = gameData[id].sticks;
-
-      // for every missing stick
-      for (var i = 0; i < gameData[id].simultaneousSticks - sticks.length; i++) {
-        // generate position again if the stick is colliding with a player or
-        // another stick
-        var x, y, stick, again;
-        do {
-          again = false;
-          x = Math.random() * (c.BOARD_WIDTH - c.STICK_WIDTH) | 0;
-          y = Math.random() * (c.BOARD_HEIGHT - c.STICK_HEIGHT) | 0;
-          newStick = new Stick(Math.random() * 2 | 0, x, y);
-
-          for (var model in players) {
-            const player = players[model];
-
-            if (again)
-              break;
-            else
-              again = newStick.isCollidingWith(player, c.STICK_MARGIN_PLACE);
-          }
-
-          for (var i = 0; i < sticks.length; i++) {
-            const stick = sticks[i];
-
-            if (again)
-              break;
-            else
-              again = newStick.isCollidingWith(stick, c.STICK_MARGIN_PLACE);
-          }
-        } while(again);
-
-        sticks.push(newStick);
-      }
+      gameData[id].generateSticks();
     }
   }, c.TIME_STICK_GENERATE);
 }
