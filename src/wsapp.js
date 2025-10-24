@@ -1,10 +1,10 @@
 var c = require('./consts');
+var u = require('./lib/utils');
 
 var fs = require('fs');
 var ws = require('ws');
 var session = require('express-session');
 var createError = require('http-errors');
-var u = require('./lib/utils');
 var Game = require('./lib/game');
 
 var gameData = {};
@@ -59,8 +59,13 @@ var app = function(wss, eapp, server) {
     var model = req.body.model;
     var simultaneousSticks = parseInt(req.body.simultaneousSticks, 10)
       || c.FORM_SIMULTANEOUS_STICKS_DEFAULT;
-    var roundTime = parseInt(req.body.time, 10) || c.FORM_TIME_DEFAULT;
-    var roundSticks = parseInt(req.body.sticks, 10) || c.FORM_STICKS_DEFAULT;
+    var roundTime = parseInt(req.body.time, 10);
+    var roundSticks = parseInt(req.body.sticks, 10);
+
+    if (roundTime === NaN)
+      roundTime = c.FORM_TIME_DEFAULT;
+    if (roundSticks === NaN)
+      roundSticks = c.FORM_STICKS_DEFAULT;
 
     // clamp
     simultaneousSticks = Math.min(

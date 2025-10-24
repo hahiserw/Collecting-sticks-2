@@ -33,6 +33,8 @@ var Game = function(uri) {
     sticks: [],
   };
 
+  this.time = null;
+
   this.updating = null;
 
   this.logElement = null;
@@ -248,6 +250,11 @@ Game.prototype.connect = function( gotInit, gotError ) {
       delete this.sticks[i];
       this.sticks[i] = new Stick( stick.model, stick.x, stick.y );
     }
+
+    if( data.sticks.length === 0 )
+      this.sticks = [];
+
+    this.time = data.time;
   }
 }
 
@@ -386,6 +393,8 @@ Game.prototype.render = function() {
   this.drawPlayers();
 
   this.drawPoints();
+
+  this.drawInfo();
 
 }
 
@@ -535,6 +544,30 @@ Game.prototype.drawPoints = function() {
     }
 
   }
+
+}
+
+Game.prototype.drawInfo = function() {
+
+  var
+    x = BOARD_WIDTH,
+    y = 0;
+
+  var timer = new Date(Math.abs(this.time) - 60 * 60 * 1000);
+  var
+    h = timer.getHours(),
+    m = timer.getMinutes(),
+    s = timer.getSeconds();
+  var time =
+    ( h < 10? "0" + h: h ) + ":" +
+    ( m < 10? "0" + m: m ) + ":" +
+    ( s < 10? "0" + s: s );
+
+  this.ctx.textAlign = "start";
+  this.ctx.fillStyle = CANVAS_TEXT_BACKGROUND_COLOR;
+  this.ctx.fillRect( x - 100, y + 13, 85, 20 );
+  this.ctx.fillStyle = CANVAS_TEXT_COLOR;
+  this.ctx.fillText( time, x - 100, y + 30, 85 );
 
 }
 

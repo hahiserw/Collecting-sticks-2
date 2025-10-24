@@ -1,6 +1,6 @@
 var c = require('../consts');
-
 var u = require('./utils');
+
 var Player = require('./player');
 var Stick = require('./stick');
 
@@ -22,6 +22,9 @@ var Game = function(name, background, simultaneousSticks, roundTime, roundSticks
   this.generateInterval = setInterval(function() {
     this.generateSticks();
   }.bind(this), c.TIME_STICK_GENERATE);
+
+  this.timeStart = Date.now();
+  this.timeEnd = Date.now() + this.roundTime * 60 * 1000;
 };
 
 Game.prototype.addPlayer = function(model) {
@@ -90,7 +93,7 @@ Game.prototype.updateSticks = function() {
 
 // send room data to every player in the room
 Game.prototype.broadcastPlayersData = function() {
-  var data = {players: {}, sticks: []};
+  var data = {players: {}, sticks: [], time: null};
 
   for (var model in this.players) {
     data.players[model] = this.getPlayer(model).getData();
@@ -99,6 +102,8 @@ Game.prototype.broadcastPlayersData = function() {
   for (var i = 0; i < this.sticks.length; i++) {
     data.sticks[i] = this.sticks[i].getData();
   }
+
+  data.time = this.timeEnd - Date.now();
 
   for (var model in this.players) {
     const ws = this.getPlayer(model).getWs();
@@ -111,6 +116,14 @@ Game.prototype.broadcastPlayersData = function() {
 };
 
 Game.prototype.generateSticks = function() {
+  // time out
+  if (this.roundTime !== 0 && Date.now() >= this.timeEnd) {
+    // delete sticks
+    this.sticks = [];
+
+    return;
+  }
+
   // for every missing stick
   for (var i = 0; i < this.simultaneousSticks - this.sticks.length; i++) {
     // generate position again if the stick is colliding with a player or
