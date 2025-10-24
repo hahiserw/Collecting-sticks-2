@@ -54,7 +54,7 @@ Game.prototype.getAnotherAvailableModel = function(models) {
   models.forEach(function(c) {
     if (!(c in this.usedModels))
       choices.push(c);
-  });
+  }.bind(this));
 
   if (choices.length) {
     var model = choices[choices.length * Math.random() | 0];
