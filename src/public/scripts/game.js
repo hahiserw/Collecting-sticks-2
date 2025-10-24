@@ -34,6 +34,7 @@ var Game = function(uri) {
   };
 
   this.time = null;
+  this.sticksLeft = 0;
 
   this.updating = null;
 
@@ -255,6 +256,7 @@ Game.prototype.connect = function( gotInit, gotError ) {
       this.sticks = [];
 
     this.time = data.time;
+    this.sticksLeft = data.sticksLeft;
   }
 }
 
@@ -558,16 +560,18 @@ Game.prototype.drawInfo = function() {
     h = timer.getHours(),
     m = timer.getMinutes(),
     s = timer.getSeconds();
-  var time =
+  var info =
     ( h < 10? "0" + h: h ) + ":" +
     ( m < 10? "0" + m: m ) + ":" +
     ( s < 10? "0" + s: s );
 
+  info += " / " + Math.abs(this.sticksLeft);
+
   this.ctx.textAlign = "start";
   this.ctx.fillStyle = CANVAS_TEXT_BACKGROUND_COLOR;
-  this.ctx.fillRect( x - 100, y + 13, 85, 20 );
+  this.ctx.fillRect( x - 140, y + 13, 130, 20 );
   this.ctx.fillStyle = CANVAS_TEXT_COLOR;
-  this.ctx.fillText( time, x - 100, y + 30, 85 );
+  this.ctx.fillText( info, x - 140, y + 30, 130 );
 
 }
 

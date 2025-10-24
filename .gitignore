@@ -3,6 +3,7 @@ Makefile
 node_modules
 package-lock.json
 *.swp
+*.swo
 pnpm-lock.yaml
 Collecting-sticks
 src2

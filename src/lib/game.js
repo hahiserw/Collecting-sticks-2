@@ -15,6 +15,8 @@ var Game = function(name, background, simultaneousSticks, roundTime, roundSticks
   this.roundSticks = roundSticks;
   this.usedModels = [];
 
+  this.sticksLeft = 0;
+
   this.broadcastInterval = setInterval(function() {
     this.broadcastPlayersData();
   }.bind(this), c.TIME_DATA_BROADCAST);
@@ -65,6 +67,8 @@ Game.prototype.getAnotherAvailableModel = function(models) {
 };
 
 Game.prototype.updateSticks = function() {
+  var mostPoints = 0;
+
   // check if player is colliding with a stick and if so, add points and
   // delete the stick
   var toDelete = [];
@@ -79,6 +83,9 @@ Game.prototype.updateSticks = function() {
         toDelete.push(i);
       }
     }
+
+    if (mostPoints < player.points)
+      mostPoints = player.points;
   }
 
   // create a new array without deleted elements
@@ -89,11 +96,13 @@ Game.prototype.updateSticks = function() {
   }
 
   this.sticks = newSticks;
+
+  this.sticksLeft = this.roundSticks - mostPoints;
 };
 
 // send room data to every player in the room
 Game.prototype.broadcastPlayersData = function() {
-  var data = {players: {}, sticks: [], time: null};
+  var data = {players: {}, sticks: [], time: null, sticksLeft: 0};
 
   for (var model in this.players) {
     data.players[model] = this.getPlayer(model).getData();
@@ -104,6 +113,7 @@ Game.prototype.broadcastPlayersData = function() {
   }
 
   data.time = this.timeEnd - Date.now();
+  data.sticksLeft = this.sticksLeft;
 
   for (var model in this.players) {
     const ws = this.getPlayer(model).getWs();
@@ -116,8 +126,9 @@ Game.prototype.broadcastPlayersData = function() {
 };
 
 Game.prototype.generateSticks = function() {
-  // time out
-  if (this.roundTime !== 0 && Date.now() >= this.timeEnd) {
+  // time out or no sticks to collect
+  if ((this.roundTime !== 0 && Date.now() >= this.timeEnd)
+    || (this.roundSticks !== 0 && this.sticksLeft <= 0)) {
     // delete sticks
     this.sticks = [];
 
