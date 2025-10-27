@@ -254,10 +254,12 @@ var app = function(wss, eapp, server) {
       const game = gameData[id];
       const player = game.getPlayer(model);
 
-      var data = {event: '', data: {}};
+      var data;
       try {
         data = JSON.parse(message);
-      } catch(error) {}
+      } catch(error) {
+        data = {};
+      }
 
       switch (data.event) {
       case 'pos':

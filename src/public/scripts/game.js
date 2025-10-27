@@ -166,7 +166,12 @@ Game.prototype.connect = function( gotInit, gotError ) {
   this.ws.addEventListener( "error", console.error );
 
   this.ws.addEventListener( "message", function( event ) {
-    var data = JSON.parse( event.data );
+    var data;
+    try {
+      data = JSON.parse( event.data );
+    } catch( error ) {
+      data = {};
+    }
 
     console.log( 'ws message', event.data );
 
