@@ -254,6 +254,12 @@ var app = function(wss, eapp, server) {
       const game = gameData[id];
       const player = game.getPlayer(model);
 
+      if (player.lastRequest > Date.now() - c.TIME_CLIENT_DATA_BROADCAST * c.PLAYER_REQUEST_THRESHOLD) {
+        return;
+      }
+
+      player.lastRequest = Date.now();
+
       var data;
       try {
         data = JSON.parse(message);

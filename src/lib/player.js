@@ -9,6 +9,8 @@ var Player = function(model, x, y) {
   this.message = '';
   this.messageTimer = null;
 
+  this.lastRequest = Date.now();
+
   this.ws = null;
 };
 

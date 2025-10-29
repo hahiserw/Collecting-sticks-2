@@ -43,6 +43,12 @@ var consts = {
   // don't update player's position if they move more than this many pixels per
   // request
   PLAYER_MOVE_STEP: 0,
+
+  // allowed threshold at which player's request is accepted
+  // it's multiplied by TIME_CLIENT_DATA_BROADCAST to get time difference
+  // between current and last request
+  // it's like antispam
+  PLAYER_REQUEST_THRESHOLD: 0.75,
 };
 
 consts.PLAYER_MOVE_STEP = consts.TIME_CLIENT_DATA_BROADCAST / 10; // px/request
