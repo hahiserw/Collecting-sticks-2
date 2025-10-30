@@ -16,6 +16,7 @@ var Game = function(name, background, simultaneousSticks, roundTime, roundSticks
   this.usedModels = [];
 
   this.sticksLeft = 0;
+  this.winner = null;
 
   this.broadcastInterval = setInterval(function() {
     this.broadcastPlayersData();
@@ -98,11 +99,28 @@ Game.prototype.updateSticks = function() {
   this.sticks = newSticks;
 
   this.sticksLeft = this.roundSticks - mostPoints;
+
+  if ((this.roundSticks !== 0 && this.sticksLeft <= 0)
+    || (this.roundTime !== 0 && Date.now() >= this.timeEnd)) {
+    var winners = [];
+    for (var model in this.players) {
+      var player = this.getPlayer(model);
+      if (player.points === mostPoints)
+        winners.push(player.model);
+    }
+    this.winner = winners.join(' and ');
+  }
 };
 
 // send room data to every player in the room
 Game.prototype.broadcastPlayersData = function() {
-  var data = {players: {}, sticks: [], time: null, sticksLeft: 0};
+  var data = {
+    players: {},
+    sticks: [],
+    time: null,
+    sticksLeft: 0,
+    winner: null,
+  };
 
   for (var model in this.players) {
     data.players[model] = this.getPlayer(model).getData();
@@ -114,6 +132,7 @@ Game.prototype.broadcastPlayersData = function() {
 
   data.time = this.timeEnd - Date.now();
   data.sticksLeft = this.sticksLeft;
+  data.winner = this.winner;
 
   for (var model in this.players) {
     const ws = this.getPlayer(model).getWs();

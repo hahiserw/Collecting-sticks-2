@@ -35,6 +35,7 @@ var Game = function(uri) {
 
   this.time = null;
   this.sticksLeft = 0;
+  this.winner = null;
 
   this.updating = null;
 
@@ -262,6 +263,8 @@ Game.prototype.connect = function( gotInit, gotError ) {
 
     this.time = data.time;
     this.sticksLeft = data.sticksLeft;
+
+    this.winner = data.winner;
   }
 }
 
@@ -402,6 +405,8 @@ Game.prototype.render = function() {
   this.drawPoints();
 
   this.drawInfo();
+
+  this.drawWinner();
 
 }
 
@@ -577,6 +582,25 @@ Game.prototype.drawInfo = function() {
   this.ctx.fillRect( x - 140, y + 13, 130, 20 );
   this.ctx.fillStyle = CANVAS_TEXT_COLOR;
   this.ctx.fillText( info, x - 140, y + 30, 130 );
+
+}
+
+Game.prototype.drawWinner = function() {
+
+  if ( !this.winner )
+    return;
+
+  var
+    x = BOARD_WIDTH / 2,
+    y = BOARD_HEIGHT / 2;
+
+  var info = this.winner + " wins!";
+
+  this.ctx.textAlign = "center";
+  this.ctx.fillStyle = CANVAS_TEXT_BACKGROUND_COLOR;
+  this.ctx.fillRect( x - BOARD_WIDTH / 2, y + 13, BOARD_WIDTH, 20 );
+  this.ctx.fillStyle = CANVAS_TEXT_COLOR;
+  this.ctx.fillText( info, x, y + 30, BOARD_WIDTH );
 
 }
 
