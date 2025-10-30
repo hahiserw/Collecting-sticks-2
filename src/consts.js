@@ -12,12 +12,13 @@ var consts = {
   // player chat
   FORM_MESSAGE_LENGTH: 50,
 
+  // everything below is in ms unit
   // how often server should send broadcasts
-  TIME_DATA_BROADCAST: 100,
+  TIME_DATA_BROADCAST: 250,
   // how often client should send data
-  TIME_CLIENT_DATA_BROADCAST: 100,
+  TIME_CLIENT_DATA_BROADCAST: 250,
   // how often a new stick should be placed if there are none
-  TIME_STICK_GENERATE: 1000,
+  TIME_STICK_GENERATE: 100,
   // how long should be a chat message displayed
   TIME_MESSAGE_TIMEOUT: 4000,
   // when to change the player's frame at client side
@@ -51,6 +52,6 @@ var consts = {
   PLAYER_REQUEST_THRESHOLD: 0.75,
 };
 
-consts.PLAYER_MOVE_STEP = consts.TIME_CLIENT_DATA_BROADCAST / 10; // px/request
+consts.PLAYER_MOVE_STEP = consts.TIME_CLIENT_DATA_BROADCAST / 8; // px/request
 
 module.exports = consts;
