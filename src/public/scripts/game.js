@@ -403,6 +403,22 @@ Game.prototype.postman = function( start ) {
 }
 
 Game.prototype.say = function( message ) {
+
+  if( message[0] === "/" ) {
+    switch( message.substring( 1 ) ) {
+    case "bot":
+      this.bot = !this.bot;
+      break;
+
+    case "quit":
+    case "back":
+      history.back();
+      break;
+    }
+
+    return;
+  }
+
   var data = {
     event: 'msg',
     data: {
