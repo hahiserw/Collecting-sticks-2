@@ -39,6 +39,8 @@ var Game = function(uri) {
 
   this.updating = null;
 
+  this.bot = false;
+
   this.logElement = null;
   this.canvas = null;
   this.ctx = null;
@@ -265,6 +267,25 @@ Game.prototype.connect = function( gotInit, gotError ) {
     this.sticksLeft = data.sticksLeft;
 
     this.winner = data.winner;
+
+    if( this.bot ) {
+      var smallest = Infinity;
+      var closest = null;
+
+      // find the closest stick
+      for( var i = 0; i < this.sticks.length; i++ ) {
+        var stick = this.sticks[i];
+        var d = Math.hypot( stick.x - this.you.getX(), stick.y - this.you.getY() );
+
+        if( smallest > d ) {
+          smallest = d;
+          closest = stick;
+        }
+      }
+
+      if( closest )
+        this.you.goTo( closest.x, closest.y );
+    }
   }
 }
 
