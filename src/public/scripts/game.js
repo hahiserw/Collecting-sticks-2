@@ -631,7 +631,8 @@ Game.prototype.drawWinner = function() {
     x = BOARD_WIDTH / 2,
     y = BOARD_HEIGHT / 2;
 
-  var info = this.winner + " wins!";
+  var info = this.winner + " win"
+    + (this.winner.indexOf(" ") !== -1? "": "s") + "!";
 
   this.ctx.textAlign = "center";
   this.ctx.fillStyle = CANVAS_TEXT_BACKGROUND_COLOR;
