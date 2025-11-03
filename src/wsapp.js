@@ -261,9 +261,9 @@ var app = function(wss, eapp, server) {
         data = {};
       }
 
-      // filter only pos events, allow msg events 'cause you can't really spam
-      // messages
-      if (data.event === 'pos' && player.lastRequest >
+      // filter only pos events
+      // allow msg events 'cause you can't really spam messages
+      if (data.event !== 'msg' && player.lastRequest >
         Date.now() - c.TIME_CLIENT_DATA_BROADCAST * c.PLAYER_REQUEST_THRESHOLD)
         return;
 
