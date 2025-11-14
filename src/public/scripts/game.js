@@ -231,7 +231,6 @@ Game.prototype.connect = function( gotInit, gotError ) {
       var player = data.players[model];
 
       if( !this.players[model] ) {
-        // XXX create player if no join message was received?
         this.players[model] = new Player( model, player.x, player.y );
       }
 
@@ -240,8 +239,14 @@ Game.prototype.connect = function( gotInit, gotError ) {
       this.players[model].say( player.message );
 
       // don't update your position
-      if( this.players[model] === this.you )
+      // but teleport if player is too far from server's positions
+      if( this.players[model] === this.you ) {
+        if( Math.abs( this.you.x - player.x ) > PLAYER_MOVE_STEP
+          || Math.abs( this.you.y - player.y ) > PLAYER_MOVE_STEP )
+          this.you.teleport( player.x, player.y );
+
         continue;
+      }
 
       this.players[model].goTo( player.x, player.y );
 

@@ -83,6 +83,13 @@ var Player = function( model, startX, startY ) {
 
   }
 
+  this.teleport = function( x, y ) {
+
+    this.x = x;
+    this.y = y;
+
+  }
+
   this.autopilotStep = function() {
 
     // Disable autopilot if destination is rached.
