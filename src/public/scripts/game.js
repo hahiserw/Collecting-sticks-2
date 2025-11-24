@@ -241,9 +241,11 @@ Game.prototype.connect = function( gotInit, gotError ) {
       // don't update your position
       // but teleport if player is too far from server's positions
       if( this.players[model] === this.you ) {
-        if( Math.abs( this.you.x - player.x ) > PLAYER_MOVE_STEP
-          || Math.abs( this.you.y - player.y ) > PLAYER_MOVE_STEP )
+        if( Math.abs( this.you.getX() - player.x ) > 2 * PLAYER_MOVE_STEP
+          || Math.abs( this.you.getY() - player.y ) > 2 * PLAYER_MOVE_STEP ) {
+          //this.log( "teleport " + this.you.getX() + "," + this.you.getY() + " -> " + player.x + "," + player.y );
           this.you.teleport( player.x, player.y );
+        }
 
         continue;
       }
