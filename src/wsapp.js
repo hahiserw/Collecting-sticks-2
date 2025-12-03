@@ -109,7 +109,9 @@ var app = function(wss, eapp, server) {
       }
     }
 
-    if (!model)
+    if (model)
+      gameData[id].usedModels.push(model);
+    else
       model = gameData[id].getAnotherAvailableModel(files.players);
 
     if (!model) {

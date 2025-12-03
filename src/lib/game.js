@@ -44,6 +44,7 @@ Game.prototype.getPlayer = function(model) {
 
 Game.prototype.deletePlayer = function(model) {
   delete this.players[model];
+  this.usedModels.splice(this.usedModels.indexOf(model), 1);
 };
 
 Game.prototype.isModelInPlayers = function(model) {
@@ -53,7 +54,7 @@ Game.prototype.isModelInPlayers = function(model) {
 Game.prototype.getAnotherAvailableModel = function(models) {
   var choices = [];
   models.forEach(function(c) {
-    if (!(c in this.usedModels))
+    if (this.usedModels.indexOf(c) === -1)
       choices.push(c);
   }.bind(this));
 
