@@ -2,9 +2,7 @@ Session.vim
 Makefile
 node_modules
 package-lock.json
-*.swp
-*.swo
-*.swn
+*.sw*
 pnpm-lock.yaml
 Collecting-sticks
 src2
