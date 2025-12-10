@@ -110,7 +110,7 @@ var app = function(wss, eapp, server) {
     }
 
     if (model)
-      gameData[id].usedModels.push(model);
+      gameData[id].addUsedModel(model);
     else
       model = gameData[id].getAnotherAvailableModel(files.players);
 

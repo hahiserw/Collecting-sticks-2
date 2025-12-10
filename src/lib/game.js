@@ -44,7 +44,7 @@ Game.prototype.getPlayer = function(model) {
 
 Game.prototype.deletePlayer = function(model) {
   delete this.players[model];
-  this.usedModels.splice(this.usedModels.indexOf(model), 1);
+  this.deleteUsedModel(model);
 };
 
 Game.prototype.isModelInPlayers = function(model) {
@@ -60,7 +60,7 @@ Game.prototype.getAnotherAvailableModel = function(models) {
 
   if (choices.length) {
     var model = choices[choices.length * Math.random() | 0];
-    this.usedModels.push(model);
+    this.addUsedModel(model);
 
     return model;
   }
@@ -193,6 +193,22 @@ Game.prototype.generateSticks = function() {
 Game.prototype.end = function() {
   clearInterval(this.broadcastInterval);
   clearInterval(this.generateInterval);
+};
+
+Game.prototype.addUsedModel = function(model) {
+  var index = this.usedModels.indexOf(model);
+  if (index !== -1)
+    return;
+
+  this.usedModels.push(model);
+};
+
+Game.prototype.deleteUsedModel = function(model) {
+  var index = this.usedModels.indexOf(model);
+  if (index === -1)
+    return;
+
+  this.usedModels.splice(index, 1);
 };
 
 module.exports = Game;
