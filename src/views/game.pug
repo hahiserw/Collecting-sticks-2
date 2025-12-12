@@ -40,11 +40,13 @@ block content
     }, false );
 
     // Player input: http://www.lostdecadegames.com/how-to-make-a-simple-html5-canvas-game/
-    // var writing = false; // Chat coming soon.
     function keyChange( event ) {
       var key = event.keyCode;
       if( key === 13 ) {
         message.focus();
+      }
+      if( key === 27 ) {
+        message.blur();
       }
       if( key < 37 || key > 40 )
         return;
