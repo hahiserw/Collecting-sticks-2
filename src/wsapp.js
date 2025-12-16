@@ -54,7 +54,7 @@ var app = function(wss, eapp, server) {
 
   eapp.post('/', function(req, res, next) {
     var name = req.body.name || '';
-    const background = req.body.background || files.backgrounds[0];
+    var background = req.body.background || files.backgrounds[0];
     const submit = req.body.submit || 'new';
     var model = req.body.model;
     var simultaneousSticks = parseInt(req.body.simultaneousSticks, 10)
@@ -84,6 +84,14 @@ var app = function(wss, eapp, server) {
     // validate?
     name = name.substring(0, c.FORM_ROOM_NAME_LENGTH).trim();
 
+    // can't choose non existent background
+    if (files.backgrounds.indexOf(background) === -1)
+      background = files.backgrounds[0];
+
+    // can't choose non existent model
+    if (files.players.indexOf(model) === -1)
+      model = null;
+
     var id = 0;
 
     if (submit === 'new') {
@@ -108,10 +116,6 @@ var app = function(wss, eapp, server) {
         return;
       }
     }
-
-    // can't choose non existent model
-    if (files.players.indexOf(model) === -1)
-      model = null;
 
     if (model)
       gameData[id].addUsedModel(model);
