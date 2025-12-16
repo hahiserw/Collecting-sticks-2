@@ -109,6 +109,10 @@ var app = function(wss, eapp, server) {
       }
     }
 
+    // can't choose non existent model
+    if (files.players.indexOf(model) === -1)
+      model = null;
+
     if (model)
       gameData[id].addUsedModel(model);
     else
