@@ -37,6 +37,10 @@ block content
         message.blur();
       };
 
+      document.getElementById( "debug" ).addEventListener( "click", function( e ) {
+        game.debug = e.target.checked;
+      } );
+
     }, false );
 
     // Player input: http://www.lostdecadegames.com/how-to-make-a-simple-html5-canvas-game/
@@ -83,3 +87,9 @@ block content
     Control your character with the arrow keys or click on the canvas. Press enter or click on the input below the canvas to chat.
 
   pre#status.overflow-auto.border.border-black.px-1 Page loaded.
+
+  div
+    .form-check
+      label.form-check-label
+        input(type='checkbox', id='debug')
+        | Debug

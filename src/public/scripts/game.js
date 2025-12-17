@@ -41,6 +41,8 @@ var Game = function(uri) {
 
   this.bot = false;
 
+  this.debug = false;
+
   this.logElement = null;
   this.canvas = null;
   this.ctx = null;
@@ -243,7 +245,8 @@ Game.prototype.connect = function( gotInit, gotError ) {
       if( this.players[model] === this.you ) {
         if( Math.abs( this.you.getX() - player.x ) > 2 * PLAYER_MOVE_STEP
           || Math.abs( this.you.getY() - player.y ) > 2 * PLAYER_MOVE_STEP ) {
-          //this.log( "teleport " + this.you.getX() + "," + this.you.getY() + " -> " + player.x + "," + player.y );
+          if (this.debug)
+            this.log( "teleport " + this.you.getX() + "," + this.you.getY() + " -> " + player.x + "," + player.y );
           this.you.teleport( player.x, player.y );
         }
 
